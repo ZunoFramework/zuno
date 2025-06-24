@@ -1,0 +1,9 @@
+#pragma once
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
+#define ZUNO_VERSION_STR \
+    TOSTRING(ZUNO_VERSION_MAJOR) "." \
+    TOSTRING(ZUNO_VERSION_MINOR) "." \
+    TOSTRING(ZUNO_VERSION_PATCH)

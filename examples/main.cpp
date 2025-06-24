@@ -20,8 +20,12 @@ int main() {
     });
 
     app.post("/echo", [](const zuno::Request& req, zuno::Response& res) {
+        try{
         auto body = req.json();
         res.json(body);
+        }catch (std::runtime_error &ex){
+            res.status(500).json({{"error", ex.what() }});
+        }
     });
 
     app.put("/update", [](const zuno::Request& req, zuno::Response& res) {

@@ -85,5 +85,4 @@
     },
     "C_Cpp.clang_format_style": "file",
     "C_Cpp.errorSquiggles": "enabled",
-    "C_Cpp.intelliSenseEngine": "Tag Parser",
 }

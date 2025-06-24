@@ -4,6 +4,8 @@
 #include "zuno/response.hpp"
 #include "zuno/app.hpp"
 
+using namespace zuno::log::color;
+
 namespace zuno {
 
 HttpServer::HttpServer(asio::io_context& ctx, int port, const App& app)
@@ -26,27 +28,29 @@ void HttpServer::doAccept() {
 
 void HttpServer::handleConnection(asio::ip::tcp::socket socket) {
     try {
+        auto start = std::chrono::steady_clock::now();
+
         asio::streambuf buffer;
         asio::read_until(socket, buffer, "\r\n\r\n");
 
         std::istream stream(&buffer);
         std::string requestLine;
         std::getline(stream, requestLine);
-        if (requestLine.back() == '\r') requestLine.pop_back();
+        if (!requestLine.empty() && requestLine.back() == '\r') requestLine.pop_back();
 
         std::string method, path, version;
-        std::istringstream lineStream(requestLine);
-        lineStream >> method >> path >> version;
+        std::istringstream rl(requestLine);
+        rl >> method >> path >> version;
 
         std::unordered_map<std::string, std::string> headers;
-        std::string header;
-        while (std::getline(stream, header) && header != "\r") {
-            if (header.back() == '\r') header.pop_back();
-            auto pos = header.find(":");
+        std::string line;
+        while (std::getline(stream, line) && line != "\r") {
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            auto pos = line.find(":");
             if (pos != std::string::npos) {
-                std::string key = header.substr(0, pos);
-                std::string value = header.substr(pos + 1);
-                while (!value.empty() && value[0] == ' ') value.erase(0, 1);
+                std::string key = line.substr(0, pos);
+                std::string value = line.substr(pos + 1);
+                while (!value.empty() && value.front() == ' ') value.erase(0, 1);
                 headers[key] = value;
             }
         }
@@ -60,7 +64,6 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket) {
         if (contentLength > 0) {
             std::size_t already = buffer.size();
             std::size_t remaining = (contentLength > already) ? (contentLength - already) : 0;
-
             if (remaining > 0) {
                 asio::read(socket, buffer, asio::transfer_exactly(remaining));
             }
@@ -73,22 +76,36 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket) {
         std::unordered_map<std::string, std::string> params;
         auto handler = app_.resolveHandler(method, path, params);
 
-        Request req(path, socket);  
+        zuno::Request req(path, socket);
+        req.method = method;
         req.params = std::move(params);
         req.headers = std::move(headers);
-        req.body = std::move(body);  
+        req.body = std::move(body);
 
-        Response res(socket);
+        zuno::Response res(socket);
 
-        if (handler) {
-            handler(req, res);
-        } else {
-            res.send("Not found", 404);
-        }
+        std::size_t index = 0;
+        std::function<void()> next = [&](){
+            if(index < app_.middlewares_.size()){
+                auto current = app_.middlewares_[index++];
+                current(req,res,next);
+            } else if (handler) {
+                handler(req, res);
+            } else {
+                res.status(404).send("Not Found");
+            }
+        };
+
+        next();
+
+
+        auto end = std::chrono::steady_clock::now();
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+        log::request(method, path, res.statusCode(), ms);
 
     } catch (const std::exception& ex) {
-        std::cerr << "[ZUNO] Error handling connection: " << ex.what() << "\n";
+        std::cerr << red << "[ZUNO] ❌ Error: " << ex.what() << reset << "\n";
     }
 }
-
 }

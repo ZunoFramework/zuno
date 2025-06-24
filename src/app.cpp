@@ -45,6 +45,7 @@ Handler App::resolveHandler(const std::string& method,
 
 
 void App::listen(int port) {
+    std::cout << bold << green << "Zuno v" << ZUNO_VERSION_STR << reset << "\n";
     asio::io_context ctx;
     HttpServer server(ctx, port, *this);
     server.start();

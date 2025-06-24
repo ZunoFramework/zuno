@@ -1,25 +1,28 @@
 #pragma once
 
 #include <asio.hpp>
-#include <string>
-#include <ostream>
 #include <nlohmann/json.hpp>
+#include <ostream>
+#include <string>
 #include "zuno/version.hpp"
 
-namespace zuno {
+namespace zuno
+{
 
-class Response {
-public:
-    explicit Response(asio::ip::tcp::socket& socket)
-        : socket_(socket), stream_(&buffer_) {}
+class Response
+{
+   public:
+    explicit Response(asio::ip::tcp::socket& socket) : socket_(socket), stream_(&buffer_) {}
 
-    void send(const std::string& body, const std::string& contentType = "text/plain") {
+    void send(const std::string& body, const std::string& contentType = "text/plain")
+    {
         stream_ << "HTTP/1.1 " << statusCode_ << " OK\r\n";
-        
-        for (const auto& [key, value] : headers_) {
+
+        for (const auto& [key, value] : headers_)
+        {
             stream_ << key << ": " << value << "\r\n";
         }
-        
+
         stream_ << "Content-Length: " << body.size() << "\r\n"
                 << "Content-Type: " << contentType << "; charset=utf-8\r\n"
                 << "\r\n"
@@ -27,35 +30,42 @@ public:
         flush();
     }
 
-    void json(const nlohmann::json& data) {
-        std::string body = data.dump(2); 
+    void json(const nlohmann::json& data)
+    {
+        std::string body = data.dump(2);
         send(body, "application/json");
     }
 
-    int statusCode() const { return statusCode_; }
+    int statusCode() const
+    {
+        return statusCode_;
+    }
 
-    Response& status(int code) {
+    Response& status(int code)
+    {
         statusCode_ = code;
         return *this;
     }
 
-    Response& setHeader(const std::string& key, const std::string& value) {
+    Response& setHeader(const std::string& key, const std::string& value)
+    {
         headers_[key] = value;
         return *this;
     }
 
-
-private:
+   private:
     asio::ip::tcp::socket& socket_;
     asio::streambuf buffer_;
     std::ostream stream_;
-    std::unordered_map<std::string, std::string> headers_ ={{ "X-Powered-By", std::string("Zuno/") + ZUNO_VERSION_STR }};
+    std::unordered_map<std::string, std::string> headers_ = {
+        {"X-Powered-By", std::string("Zuno/") + ZUNO_VERSION_STR}};
 
     int statusCode_ = 200;
 
-    void flush() {
+    void flush()
+    {
         asio::write(socket_, buffer_);
     }
 };
 
-}
+} // namespace zuno

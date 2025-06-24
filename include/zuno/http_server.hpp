@@ -1,19 +1,20 @@
 #pragma once
 
 #include <asio.hpp>
+#include <functional>
 #include <memory>
 #include <unordered_map>
-#include <functional>
+#include "app.hpp"
 #include "request.hpp"
 #include "response.hpp"
 #include "zuno/logger.hpp"
-#include "app.hpp"
 
+namespace zuno
+{
 
-namespace zuno {
-
-class HttpServer {
-public:
+class HttpServer
+{
+   public:
     using Handler = std::function<void(const Request&, Response&)>;
     const App& app_;
 
@@ -21,7 +22,7 @@ public:
 
     void start();
 
-private:
+   private:
     asio::ip::tcp::acceptor acceptor_;
     asio::ip::tcp::socket socket_;
     std::unordered_map<std::string, Handler> routes_;
@@ -30,4 +31,4 @@ private:
     void handleConnection(asio::ip::tcp::socket socket);
 };
 
-}
+} // namespace zuno

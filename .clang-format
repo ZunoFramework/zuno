@@ -1,5 +1,8 @@
-BasedOnStyle: LLVM
+---
+BasedOnStyle: Google
 IndentWidth: 4
+---
+Language: Cpp
 ColumnLimit: 100
 AllowShortFunctionsOnASingleLine: Empty
 DerivePointerAlignment: false
@@ -8,5 +11,3 @@ SortIncludes: true
 IncludeBlocks: Preserve
 SpacesBeforeTrailingComments: 1
 BreakBeforeBraces: Allman
-Language: Cpp
-Standard: Cpp20

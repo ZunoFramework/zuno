@@ -30,15 +30,11 @@ Route compileRoute(const std::string& path, std::function<void(const Request&, R
     }
     regexStr += "$";
     return Route{
-        .pattern = std::regex(regexStr),
-        .paramNames = paramNames,
-        .rawPath = path,
-        .handler = handler,
+        std::regex(regexStr), paramNames, handler, {}, path,
     };
 }
 
-Route compileRoute(const std::string& path, std::initializer_list<Middleware> mws,
-                   std::function<void(const Request&, Response&)> handler)
+Route compileRoute(const std::string& path, std::initializer_list<Middleware> mws, std::function<void(const Request&, Response&)> handler)
 {
     std::string regexStr = "^";
     std::vector<std::string> paramNames;
@@ -66,11 +62,7 @@ Route compileRoute(const std::string& path, std::initializer_list<Middleware> mw
     regexStr += "$";
 
     return Route{
-        .pattern = std::regex(regexStr),
-        .paramNames = paramNames,
-        .middlewares = std::vector<Middleware>(mws),
-        .rawPath = path,
-        .handler = handler,
+        std::regex(regexStr), paramNames, handler, std::vector<Middleware>(mws), path,
     };
 }
 

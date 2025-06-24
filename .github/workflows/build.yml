@@ -1,0 +1,23 @@
+# .github/workflows/build.yml
+
+name: Build Zuno
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v3
+
+    - name: Instalar CMake, GCC, Make
+      run: sudo apt-get update && sudo apt-get install -y cmake build-essential
+
+    - name: Crear directorio build
+      run: mkdir build && cd build && cmake .. && make

@@ -17,8 +17,7 @@ void App::addRoute(const std::string& method, const std::string& path, Handler h
     routes[m].push_back(compileRoute(path, handler));
 }
 
-void App::addRoute(const std::string& method, const std::string& path,
-                   std::initializer_list<Middleware> mws, Handler handler)
+void App::addRoute(const std::string& method, const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
 {
     std::string m = method;
     std::transform(m.begin(), m.end(), m.begin(), ::toupper);
@@ -30,19 +29,9 @@ void App::get(const std::string& path, Handler handler)
     addRoute("GET", path, std::move(handler));
 }
 
-void App::get(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
-{
-    addRoute("GET", path, mws, std::move(handler));
-}
-
 void App::post(const std::string& path, Handler handler)
 {
     addRoute("POST", path, std::move(handler));
-}
-
-void App::post(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
-{
-    addRoute("POST", path, mws, std::move(handler));
 }
 
 void App::put(const std::string& path, Handler handler)
@@ -50,9 +39,9 @@ void App::put(const std::string& path, Handler handler)
     addRoute("PUT", path, std::move(handler));
 }
 
-void App::put(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
+void App::patch(const std::string& path, Handler handler)
 {
-    addRoute("PUT", path, mws, std::move(handler));
+    addRoute("PATCH", path, std::move(handler));
 }
 
 void App::del(const std::string& path, Handler handler)
@@ -60,14 +49,45 @@ void App::del(const std::string& path, Handler handler)
     addRoute("DELETE", path, std::move(handler));
 }
 
+void App::options(const std::string& path, Handler handler)
+{
+    addRoute("OPTIONS", path, std::move(handler));
+}
+
+// With Midlewares
+
+void App::get(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
+{
+    addRoute("GET", path, mws, std::move(handler));
+}
+
+void App::post(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
+{
+    addRoute("POST", path, mws, std::move(handler));
+}
+
+void App::put(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
+{
+    addRoute("PUT", path, mws, std::move(handler));
+}
+
+void App::patch(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
+{
+    addRoute("PATCH", path, mws, std::move(handler));
+}
+
 void App::del(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
 {
     addRoute("DELETE", path, mws, std::move(handler));
 }
 
-std::function<void(Request&, Response&)> App::resolveHandler(
-    const std::string& method, const std::string& path,
-    std::unordered_map<std::string, std::string>& outParams) const
+void App::options(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
+{
+    addRoute("OPTIONS", path, mws, std::move(handler));
+}
+
+std::function<void(Request&, Response&)> App::resolveHandler(const std::string& method, const std::string& path,
+                                                             std::unordered_map<std::string, std::string>& outParams) const
 {
     auto it = routes.find(method);
     if (it == routes.end()) return nullptr;
@@ -116,8 +136,8 @@ void App::listen(int port)
     HttpServer server(ctx, port, *this);
     server.start();
 
-    log::log(bold + std::string("[ZUNO]") + reset + std::string(" 🚀 Listening on ") + cyan +
-             std::string("http://localhost:") + std::to_string(port) + reset);
+    log::log(bold + std::string("[ZUNO]") + reset + std::string(" 🚀 Listening on ") + cyan + std::string("http://localhost:") +
+             std::to_string(port) + reset);
 
     ctx.run();
 }

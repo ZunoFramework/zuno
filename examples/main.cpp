@@ -1,19 +1,18 @@
+#include <zuno/middlewares/cors.hpp>
 #include <zuno/zuno.hpp>
 
 int main()
 {
     zuno::App app;
 
-    app.get("/",
-            [](const zuno::Request& req, zuno::Response& res) { res.send("Welcome to Zuno 🚀"); });
+    app.use(zuno::cors());
+    app.get("/", [](const zuno::Request& req, zuno::Response& res) { res.send("Welcome to Zuno 🚀"); });
 
-    app.get("/hola/:name", [](const zuno::Request& req, zuno::Response& res)
-            { res.send("Welcome to Zuno " + req.param("name") + " 🚀"); });
+    app.get("/hola/:name", [](const zuno::Request& req, zuno::Response& res) { res.send("Welcome to Zuno " + req.param("name") + " 🚀"); });
 
     app.get("/ping", [](const zuno::Request& req, zuno::Response& res) { res.send("pong"); });
 
-    app.post("/login", [](const zuno::Request& req, zuno::Response& res)
-             { res.send("POST /login received"); });
+    app.post("/login", [](const zuno::Request& req, zuno::Response& res) { res.send("POST /login received"); });
 
     app.post("/echo",
              [](const zuno::Request& req, zuno::Response& res)
@@ -39,14 +38,11 @@ int main()
                  }
                  next();
              }},
-            [](const zuno::Request& req, zuno::Response& res)
-            { res.json({{"secret", "Aquí tienes el acceso 🤫"}}); });
+            [](const zuno::Request& req, zuno::Response& res) { res.json({{"secret", "Aquí tienes el acceso 🤫"}}); });
 
-    app.put("/update", [](const zuno::Request& req, zuno::Response& res)
-            { res.send("PUT /update received"); });
+    app.put("/update", [](const zuno::Request& req, zuno::Response& res) { res.send("PUT /update received"); });
 
-    app.del("/delete", [](const zuno::Request& req, zuno::Response& res)
-            { res.send("DELETE /delete received"); });
+    app.del("/delete", [](const zuno::Request& req, zuno::Response& res) { res.send("DELETE /delete received"); });
 
     app.listen(3000);
 }

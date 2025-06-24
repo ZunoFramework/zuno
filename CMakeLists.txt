@@ -1,46 +1,62 @@
-cmake_minimum_required(VERSION 3.14)
-project(Zuno LANGUAGES CXX)
-
-set(ZUNO_VERSION_MAJOR 0)
-set(ZUNO_VERSION_MINOR 1)
-set(ZUNO_VERSION_PATCH 0)
-
-add_compile_definitions(
-    ZUNO_VERSION_MAJOR=${ZUNO_VERSION_MAJOR}
-    ZUNO_VERSION_MINOR=${ZUNO_VERSION_MINOR}
-    ZUNO_VERSION_PATCH=${ZUNO_VERSION_PATCH}
-)
+cmake_minimum_required(VERSION 3.20)
+project(zuno VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-include_directories(include)
+set(ZUNO_ENABLE_TESTS ON)
 
-add_library(zuno STATIC
-    src/app.cpp
-    src/http_server.cpp
-    src/route.cpp
+# ---📌 Version Info------------------------------------
+add_compile_definitions(
+  ZUNO_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+  ZUNO_VERSION_MINOR=${PROJECT_VERSION_MINOR}
+  ZUNO_VERSION_PATCH=${PROJECT_VERSION_PATCH}
 )
 
-add_executable(zuno_example examples/main.cpp)
+if(ZUNO_ENABLE_TESTS)
+  add_compile_definitions(ZUNO_ENABLE_TESTS)
+endif()
 
+# ---📦 Dependencies------------------------------------
 include(FetchContent)
 
+## Catch2 (testing)
+if(ZUNO_ENABLE_TESTS)
+  FetchContent_Declare(
+    catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.5.3
+    DOWNLOAD_EXTRACT_TIMESTAMP true
+  )
+  FetchContent_MakeAvailable(catch2)
+endif()
+
+## nlohmann::json
 FetchContent_Declare(
-  asio
-  GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
-  GIT_TAG asio-1-30-1
+  nlohmann_json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG v3.11.3
+  DOWNLOAD_EXTRACT_TIMESTAMP true
 )
-FetchContent_MakeAvailable(asio)
+FetchContent_MakeAvailable(nlohmann_json)
+
+# ---📁 Source Files------------------------------------
+file(GLOB_RECURSE ZUNO_SOURCES CONFIGURE_DEPENDS src/*.cpp)
+file(GLOB_RECURSE ZUNO_HEADERS CONFIGURE_DEPENDS include/*.hpp)
+
+# ---🎯 Build Targets-----------------------------------
+add_library(zuno STATIC ${ZUNO_SOURCES} ${ZUNO_HEADERS})
+
+target_include_directories(zuno PUBLIC include)
 target_compile_definitions(zuno PUBLIC ASIO_STANDALONE)
-
-FetchContent_Declare(
-  json
-  URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
-)
-
-FetchContent_MakeAvailable(json)
 target_link_libraries(zuno PUBLIC nlohmann_json::nlohmann_json)
 
-target_link_libraries(zuno_example zuno)
+
+# ---🧪 Unit Tests--------------------------------------
+if(ZUNO_ENABLE_TESTS)
+  add_executable(zuno-tests
+    tests/route_test.cpp
+  )
+
+  target_link_libraries(zuno-tests PRIVATE zuno Catch2::Catch2WithMain)
+endif()

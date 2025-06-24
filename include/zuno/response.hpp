@@ -63,8 +63,7 @@ class Response
     asio::ip::tcp::socket& socket_;
     asio::streambuf buffer_;
     std::ostream stream_;
-    std::unordered_map<std::string, std::string> headers_ = {
-        {"X-Powered-By", std::string("Zuno/") + ZUNO_VERSION_STR}};
+    std::unordered_map<std::string, std::string> headers_ = {{"X-Powered-By", std::string("Zuno/") + ZUNO_VERSION_STR}};
 
     int statusCode_ = 200;
 

@@ -27,7 +27,7 @@ private:
     std::unordered_map<std::string, Handler> routes_;
 
     void doAccept();
-    void handleConnection();
+    void handleConnection(asio::ip::tcp::socket socket);
 };
 
 }

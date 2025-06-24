@@ -70,8 +70,20 @@
         "format": "cpp",
         "ostream": "cpp",
         "stop_token": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "__tree": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "regex": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "ranges": "cpp",
+        "forward_list": "cpp",
+        "valarray": "cpp",
+        "complex": "cpp",
+        "future": "cpp"
     },
     "C_Cpp.clang_format_style": "file",
+    "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.intelliSenseEngine": "Tag Parser",
 }

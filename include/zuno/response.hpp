@@ -1,38 +1,38 @@
 #pragma once
 
-#include <string>
-#include <sstream>
 #include <asio.hpp>
+#include <string>
+#include <ostream>
+#include <nlohmann/json.hpp>
 
 namespace zuno {
 
 class Response {
 public:
     explicit Response(asio::ip::tcp::socket& socket)
-        : socket_(socket) {}
+        : socket_(socket), stream_(&buffer_) {}
 
-    void send(const std::string& body, int status = 200, const std::string& contentType = "text/plain") {
-        std::ostringstream response_stream;
-        response_stream << "HTTP/1.1 " << status << " " << statusMessage(status) << "\r\n"
-                        << "Content-Length: " << body.size() << "\r\n"
-                        << "Content-Type: " << contentType << "; charset=utf-8\r\n"
-                        << "Connection: close\r\n"
-                        << "\r\n"
-                        << body;
+    void send(const std::string& body, int statusCode = 200, const std::string& contentType = "text/plain") {
+        stream_ << "HTTP/1.1 " << statusCode << " OK\r\n"
+                << "Content-Length: " << body.size() << "\r\n"
+                << "Content-Type: " << contentType << "; charset=utf-8\r\n"
+                << "\r\n"
+                << body;
+        flush();
+    }
 
-        asio::write(socket_, asio::buffer(response_stream.str()));
+    void json(const nlohmann::json& data, int statusCode = 200) {
+        std::string body = data.dump(2); 
+        send(body, statusCode, "application/json");
     }
 
 private:
     asio::ip::tcp::socket& socket_;
+    asio::streambuf buffer_;
+    std::ostream stream_;
 
-    std::string statusMessage(int code) const {
-        switch (code) {
-            case 200: return "OK";
-            case 404: return "Not Found";
-            case 500: return "Internal Server Error";
-            default: return "Unknown";
-        }
+    void flush() {
+        asio::write(socket_, buffer_);
     }
 };
 

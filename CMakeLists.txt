@@ -22,8 +22,15 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
   GIT_TAG asio-1-30-1
 )
-
 FetchContent_MakeAvailable(asio)
 target_compile_definitions(zuno PUBLIC ASIO_STANDALONE)
+
+FetchContent_Declare(
+  json
+  URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
+)
+
+FetchContent_MakeAvailable(json)
+target_link_libraries(zuno PUBLIC nlohmann_json::nlohmann_json)
 
 target_link_libraries(zuno_example zuno)

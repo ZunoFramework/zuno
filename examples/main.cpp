@@ -19,6 +19,11 @@ int main() {
         res.send("POST /login received");
     });
 
+    app.post("/echo", [](const zuno::Request& req, zuno::Response& res) {
+        auto body = req.json();
+        res.json(body);
+    });
+
     app.put("/update", [](const zuno::Request& req, zuno::Response& res) {
         res.send("PUT /update received");
     });

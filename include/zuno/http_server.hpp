@@ -5,6 +5,7 @@
 #include <memory>
 #include <unordered_map>
 #include "app.hpp"
+#include "common.hpp"
 #include "request.hpp"
 #include "response.hpp"
 #include "zuno/logger.hpp"

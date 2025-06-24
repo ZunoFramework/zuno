@@ -1,57 +1,122 @@
 #include "zuno/app.hpp"
-#include "zuno/http_server.hpp"
-#include "zuno/route.hpp"
-#include "zuno/logger.hpp"
-#include <asio.hpp>
 #include <algorithm>
+#include <asio.hpp>
+#include "zuno/http_server.hpp"
+#include "zuno/logger.hpp"
+#include "zuno/route.hpp"
 
 using namespace zuno::log::color;
 
-namespace zuno {
+namespace zuno
+{
 
-void App::addRoute(const std::string& method, const std::string& path, Handler handler) {
+void App::addRoute(const std::string& method, const std::string& path, Handler handler)
+{
     std::string m = method;
     std::transform(m.begin(), m.end(), m.begin(), ::toupper);
     routes[m].push_back(compileRoute(path, handler));
 }
 
-
-void App::get(const std::string& path, Handler handler)  { addRoute("GET", path, handler); }
-void App::post(const std::string& path, Handler handler) { addRoute("POST", path, handler); }
-void App::put(const std::string& path, Handler handler)  { addRoute("PUT", path, handler); }
-void App::del(const std::string& path, Handler handler)  { addRoute("DELETE", path, handler); }
-
-Handler App::resolveHandler(const std::string& method,
-                            const std::string& path,
-                            std::unordered_map<std::string, std::string>& outParams) const {
+void App::addRoute(const std::string& method, const std::string& path,
+                   std::initializer_list<Middleware> mws, Handler handler)
+{
     std::string m = method;
     std::transform(m.begin(), m.end(), m.begin(), ::toupper);
+    routes[m].push_back(compileRoute(path, mws, handler));
+}
 
-    auto it = routes.find(m);
+void App::get(const std::string& path, Handler handler)
+{
+    addRoute("GET", path, handler);
+}
+
+void App::get(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
+{
+    addRoute("GET", path, mws, handler);
+}
+
+void App::post(const std::string& path, Handler handler)
+{
+    addRoute("POST", path, handler);
+}
+
+void App::post(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
+{
+    addRoute("POST", path, mws, handler);
+}
+
+void App::put(const std::string& path, Handler handler)
+{
+    addRoute("PUT", path, handler);
+}
+
+void App::put(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
+{
+    addRoute("PUT", path, mws, handler);
+}
+
+void App::del(const std::string& path, Handler handler)
+{
+    addRoute("DELETE", path, handler);
+}
+
+void App::del(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
+{
+    addRoute("DELETE", path, mws, handler);
+}
+
+std::function<void(Request&, Response&)> App::resolveHandler(
+    const std::string& method, const std::string& path,
+    std::unordered_map<std::string, std::string>& outParams) const
+{
+    auto it = routes.find(method);
     if (it == routes.end()) return nullptr;
 
-    for (const auto& route : it->second) {
+    for (const auto& route : it->second)
+    {
         std::smatch match;
-        if (std::regex_match(path, match, route.pattern)) {
-            for (size_t i = 0; i < route.paramNames.size(); ++i) {
+        if (std::regex_match(path, match, route.pattern))
+        {
+            for (size_t i = 0; i < route.paramNames.size(); ++i)
+            {
                 outParams[route.paramNames[i]] = match[i + 1];
             }
-            return route.handler;
+
+            // Componer middlewares de la ruta + handler en una cadena ejecutable
+            return [route](Request& req, Response& res)
+            {
+                std::size_t index = 0;
+                std::function<void()> next;
+
+                next = [&]()
+                {
+                    if (index < route.middlewares.size())
+                    {
+                        auto& mw = route.middlewares[index++];
+                        mw(req, res, next);
+                    }
+                    else
+                    {
+                        route.handler(req, res);
+                    }
+                };
+
+                next();
+            };
         }
     }
 
     return nullptr;
 }
 
-
-void App::listen(int port) {
+void App::listen(int port)
+{
     std::cout << bold << green << "Zuno v" << ZUNO_VERSION_STR << reset << "\n";
     asio::io_context ctx;
     HttpServer server(ctx, port, *this);
     server.start();
-    std::cout << bold << "[ZUNO] 🚀 Listening on "
-          << cyan << "http://localhost:" << port
-          << reset << "\n";
+    std::cout << bold << "[ZUNO] 🚀 Listening on " << cyan << "http://localhost:" << port << reset
+              << "\n";
     ctx.run();
 }
 

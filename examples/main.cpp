@@ -29,6 +29,19 @@ int main()
                  }
              });
 
+    app.get("/secret",
+            {[](zuno::Request& req, zuno::Response& res, zuno::Next next)
+             {
+                 const auto& token = req.headers["Authorization"];
+                 if (token != "Token123")
+                 {
+                     return res.status(401).json({{"error", "Token inválido"}});
+                 }
+                 next();
+             }},
+            [](const zuno::Request& req, zuno::Response& res)
+            { res.json({{"secret", "Aquí tienes el acceso 🤫"}}); });
+
     app.put("/update", [](const zuno::Request& req, zuno::Response& res)
             { res.send("PUT /update received"); });
 

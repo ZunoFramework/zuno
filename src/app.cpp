@@ -27,42 +27,42 @@ void App::addRoute(const std::string& method, const std::string& path,
 
 void App::get(const std::string& path, Handler handler)
 {
-    addRoute("GET", path, handler);
+    addRoute("GET", path, std::move(handler));
 }
 
 void App::get(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
 {
-    addRoute("GET", path, mws, handler);
+    addRoute("GET", path, mws, std::move(handler));
 }
 
 void App::post(const std::string& path, Handler handler)
 {
-    addRoute("POST", path, handler);
+    addRoute("POST", path, std::move(handler));
 }
 
 void App::post(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
 {
-    addRoute("POST", path, mws, handler);
+    addRoute("POST", path, mws, std::move(handler));
 }
 
 void App::put(const std::string& path, Handler handler)
 {
-    addRoute("PUT", path, handler);
+    addRoute("PUT", path, std::move(handler));
 }
 
 void App::put(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
 {
-    addRoute("PUT", path, mws, handler);
+    addRoute("PUT", path, mws, std::move(handler));
 }
 
 void App::del(const std::string& path, Handler handler)
 {
-    addRoute("DELETE", path, handler);
+    addRoute("DELETE", path, std::move(handler));
 }
 
 void App::del(const std::string& path, std::initializer_list<Middleware> mws, Handler handler)
 {
-    addRoute("DELETE", path, mws, handler);
+    addRoute("DELETE", path, mws, std::move(handler));
 }
 
 std::function<void(Request&, Response&)> App::resolveHandler(

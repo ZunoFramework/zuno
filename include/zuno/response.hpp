@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <ostream>
 #include <string>
+#include "zuno/utils.hpp"
 #include "zuno/version.hpp"
 
 namespace zuno
@@ -16,7 +17,7 @@ class Response
 
     void send(const std::string& body, const std::string& contentType = "text/plain")
     {
-        stream_ << "HTTP/1.1 " << statusCode_ << " OK\r\n";
+        stream_ << "HTTP/1.1 " << statusCode_ << " " << zuno::statusText(statusCode_) << "\r\n";
 
         for (const auto& [key, value] : headers_)
         {
@@ -39,6 +40,11 @@ class Response
     int statusCode() const
     {
         return statusCode_;
+    }
+
+    std::string statusText() const
+    {
+        return zuno::statusText(statusCode_);
     }
 
     Response& status(int code)

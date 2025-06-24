@@ -1,5 +1,9 @@
 #pragma once
+
+#include <chrono>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 namespace zuno::log
@@ -17,6 +21,18 @@ const std::string magenta = "\033[35m";
 const std::string gray = "\033[90m";
 } // namespace color
 
+inline std::string timestamp()
+{
+    using namespace std::chrono;
+    auto now = system_clock::now();
+    auto time = system_clock::to_time_t(now);
+    std::tm tm = *std::localtime(&time);
+
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%H:%M:%S");
+    return oss.str();
+}
+
 inline void request(const std::string& method, const std::string& path, int status, long durationMs)
 {
     std::string methodColor = color::cyan;
@@ -32,6 +48,32 @@ inline void request(const std::string& method, const std::string& path, int stat
     std::cout << color::bold << "[ZUNO] " << methodColor << method << " " << color::reset << path
               << " " << color::gray << "→ " << statusColor << status << color::reset << " "
               << color::magenta << durationMs << "ms" << color::reset << "\n";
+}
+
+inline void log(const std::string& msg)
+{
+    std::cout << msg << "\n";
+}
+
+inline void info(const std::string& msg)
+{
+    using namespace color;
+    std::cout << bold << cyan << "[INFO] " << gray << "[" << timestamp() << "] " << reset << msg
+              << "\n";
+}
+
+inline void warn(const std::string& msg)
+{
+    using namespace color;
+    std::cout << bold << yellow << "[WARN] " << gray << "[" << timestamp() << "] " << reset << msg
+              << "\n";
+}
+
+inline void error(const std::string& msg)
+{
+    using namespace color;
+    std::cerr << bold << red << "[ERROR] " << gray << "[" << timestamp() << "] " << reset << msg
+              << "\n";
 }
 
 } // namespace zuno::log

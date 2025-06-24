@@ -1,33 +1,41 @@
 #include "zuno/http_server.hpp"
+#include "zuno/app.hpp"
 #include "zuno/logger.hpp"
 #include "zuno/request.hpp"
 #include "zuno/response.hpp"
-#include "zuno/app.hpp"
 
 using namespace zuno::log::color;
 
-namespace zuno {
+namespace zuno
+{
 
 HttpServer::HttpServer(asio::io_context& ctx, int port, const App& app)
-    : acceptor_(ctx, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)),
-      socket_(ctx),
-      app_(app) {}
+    : acceptor_(ctx, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)), socket_(ctx), app_(app)
+{
+}
 
-void HttpServer::start() {
+void HttpServer::start()
+{
     doAccept();
 }
 
-void HttpServer::doAccept() {
-    acceptor_.async_accept(socket_, [this](std::error_code ec) {
-        if (!ec) {
-            handleConnection(std::move(socket_));
-        }
-        doAccept();
-    });
+void HttpServer::doAccept()
+{
+    acceptor_.async_accept(socket_,
+                           [this](std::error_code ec)
+                           {
+                               if (!ec)
+                               {
+                                   handleConnection(std::move(socket_));
+                               }
+                               doAccept();
+                           });
 }
 
-void HttpServer::handleConnection(asio::ip::tcp::socket socket) {
-    try {
+void HttpServer::handleConnection(asio::ip::tcp::socket socket)
+{
+    try
+    {
         auto start = std::chrono::steady_clock::now();
 
         asio::streambuf buffer;
@@ -44,10 +52,12 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket) {
 
         std::unordered_map<std::string, std::string> headers;
         std::string line;
-        while (std::getline(stream, line) && line != "\r") {
+        while (std::getline(stream, line) && line != "\r")
+        {
             if (!line.empty() && line.back() == '\r') line.pop_back();
             auto pos = line.find(":");
-            if (pos != std::string::npos) {
+            if (pos != std::string::npos)
+            {
                 std::string key = line.substr(0, pos);
                 std::string value = line.substr(pos + 1);
                 while (!value.empty() && value.front() == ' ') value.erase(0, 1);
@@ -56,15 +66,18 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket) {
         }
 
         std::size_t contentLength = 0;
-        if (headers.count("Content-Length")) {
+        if (headers.count("Content-Length"))
+        {
             contentLength = std::stoul(headers["Content-Length"]);
         }
 
         std::string body;
-        if (contentLength > 0) {
+        if (contentLength > 0)
+        {
             std::size_t already = buffer.size();
             std::size_t remaining = (contentLength > already) ? (contentLength - already) : 0;
-            if (remaining > 0) {
+            if (remaining > 0)
+            {
                 asio::read(socket, buffer, asio::transfer_exactly(remaining));
             }
 
@@ -85,27 +98,33 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket) {
         zuno::Response res(socket);
 
         std::size_t index = 0;
-        std::function<void()> next = [&](){
-            if(index < app_.middlewares_.size()){
+        std::function<void()> next = [&]()
+        {
+            if (index < app_.middlewares_.size())
+            {
                 auto current = app_.middlewares_[index++];
-                current(req,res,next);
-            } else if (handler) {
+                current(req, res, next);
+            }
+            else if (handler)
+            {
                 handler(req, res);
-            } else {
+            }
+            else
+            {
                 res.status(404).send("Not Found");
             }
         };
 
         next();
 
-
         auto end = std::chrono::steady_clock::now();
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
         log::request(method, path, res.statusCode(), ms);
-
-    } catch (const std::exception& ex) {
-        std::cerr << red << "[ZUNO] ❌ Error: " << ex.what() << reset << "\n";
+    }
+    catch (const std::exception& ex)
+    {
+        log::error(std::string("❌ Error: ") + ex.what());
     }
 }
-}
+} // namespace zuno

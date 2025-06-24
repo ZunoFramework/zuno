@@ -82,7 +82,6 @@ std::function<void(Request&, Response&)> App::resolveHandler(
                 outParams[route.paramNames[i]] = match[i + 1];
             }
 
-            // Componer middlewares de la ruta + handler en una cadena ejecutable
             return [route](Request& req, Response& res)
             {
                 std::size_t index = 0;
@@ -111,12 +110,15 @@ std::function<void(Request&, Response&)> App::resolveHandler(
 
 void App::listen(int port)
 {
-    std::cout << bold << green << "Zuno v" << ZUNO_VERSION_STR << reset << "\n";
+    log::log(bold + green + std::string("Zuno v") + ZUNO_VERSION_STR + reset);
+
     asio::io_context ctx;
     HttpServer server(ctx, port, *this);
     server.start();
-    std::cout << bold << "[ZUNO] 🚀 Listening on " << cyan << "http://localhost:" << port << reset
-              << "\n";
+
+    log::log(bold + std::string("[ZUNO]") + reset + std::string(" 🚀 Listening on ") + cyan +
+             std::string("http://localhost:") + std::to_string(port) + reset);
+
     ctx.run();
 }
 

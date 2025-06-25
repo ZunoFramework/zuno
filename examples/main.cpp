@@ -1,4 +1,5 @@
 #include <zuno/middlewares/cors.hpp>
+#include <zuno/middlewares/static.hpp>
 #include <zuno/zuno.hpp>
 
 int main()
@@ -6,6 +7,7 @@ int main()
     zuno::App app;
 
     app.use(zuno::cors());
+    app.use(zuno::staticFiles("public"));
     app.get("/", [](const zuno::Request& req, zuno::Response& res) { res.send("Welcome to Zuno 🚀"); });
 
     app.get("/hola/:name", [](const zuno::Request& req, zuno::Response& res) { res.send("Welcome to Zuno " + req.param("name") + " 🚀"); });

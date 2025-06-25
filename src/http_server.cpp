@@ -124,7 +124,7 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket)
     }
     catch (const std::exception& ex)
     {
-        log::error(std::string("❌ Error: ") + ex.what());
+        return;
     }
 }
 } // namespace zuno

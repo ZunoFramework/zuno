@@ -82,7 +82,8 @@
         "valarray": "cpp",
         "complex": "cpp",
         "future": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "fstream": "cpp"
     },
     "C_Cpp.clang_format_style": "file",
     "C_Cpp.errorSquiggles": "enabled",

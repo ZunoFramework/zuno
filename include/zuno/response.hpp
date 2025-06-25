@@ -15,7 +15,7 @@ class Response
    public:
     explicit Response(asio::ip::tcp::socket& socket) : socket_(socket), stream_(&buffer_) {}
 
-    void send(const std::string& body, const std::string& contentType = "text/plain")
+    void send(const std::string& body)
     {
         stream_ << "HTTP/1.1 " << statusCode_ << " " << zuno::statusText(statusCode_) << "\r\n";
 
@@ -25,7 +25,7 @@ class Response
         }
 
         stream_ << "Content-Length: " << body.size() << "\r\n"
-                << "Content-Type: " << contentType << "; charset=utf-8\r\n"
+                << "charset=utf-8\r\n"
                 << "\r\n"
                 << body;
         flush();
@@ -34,7 +34,8 @@ class Response
     void json(const nlohmann::json& data)
     {
         std::string body = data.dump(2);
-        send(body, "application/json");
+        setHeader("Content-Type", "application/json");
+        send(body);
     }
 
     int statusCode() const
@@ -63,7 +64,8 @@ class Response
     asio::ip::tcp::socket& socket_;
     asio::streambuf buffer_;
     std::ostream stream_;
-    std::unordered_map<std::string, std::string> headers_ = {{"X-Powered-By", std::string("Zuno/") + ZUNO_VERSION_STR}};
+    std::unordered_map<std::string, std::string> headers_ = {{"X-Powered-By", std::string("Zuno/") + ZUNO_VERSION_STR},
+                                                             {"Content-Type", "text/plain"}};
 
     int statusCode_ = 200;
 

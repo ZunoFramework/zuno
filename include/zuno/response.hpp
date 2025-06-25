@@ -20,6 +20,7 @@ class Response
 
     void send(const std::string& body)
     {
+        body_ = body;
         auto doSend = [this](const std::string& finalBody)
         {
             stream_ << statusLine();
@@ -61,6 +62,16 @@ class Response
         return statusCode_;
     }
 
+    std::string body()
+    {
+        return body_;
+    }
+
+    std::unordered_map<std::string, std::string> headers() const
+    {
+        return headers_;
+    }
+
     std::string statusText() const
     {
         return zuno::statusText(statusCode_);
@@ -85,6 +96,7 @@ class Response
     asio::ip::tcp::socket& socket_;
     asio::streambuf buffer_;
     std::ostream stream_;
+    std::string body_;
     std::unordered_map<std::string, std::string> headers_ = {{"X-Powered-By", std::string("Zuno/") + ZUNO_VERSION_STR},
                                                              {"Content-Type", "text/plain;charset=utf-8"}};
 

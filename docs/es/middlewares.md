@@ -6,7 +6,7 @@ Como usar middlewares globales y por ruta en zuno:
 
 ```cpp
 app.use([](Request& req, Response& res, Next next) {
-    std::cout << "Request: " << req.method << " " << req.path << "\n";
+    std::cout << "Request: " << req.method() << " " << req.path() << "\n";
     next();
 });
 ```

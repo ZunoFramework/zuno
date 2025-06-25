@@ -24,7 +24,7 @@ inline Middleware staticFiles(const std::string& directory, const std::string& u
 
     return [=](Request& req, Response& res, Next next)
     {
-        std::string path = req.path;
+        std::string path = req.path();
 
         if (!path.starts_with(urlPrefix))
         {

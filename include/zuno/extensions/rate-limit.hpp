@@ -23,7 +23,7 @@ Middleware rateLimit(const RateLimitOptions& opts)
     return [opts](Request& req, Response& res, Next next)
     {
         auto it = req.headers.find("x-forwarded-for");
-        std::string key = (it != req.headers.end()) ? it->second : req.ip;
+        std::string key = (it != req.headers.end()) ? it->second : req.ip();
 
         auto now = steady_clock::now();
 

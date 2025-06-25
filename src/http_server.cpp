@@ -90,10 +90,10 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket)
         auto handler = app_.resolveHandler(method, path, params);
 
         zuno::Request req(path, socket);
-        req.method = method;
+        req.setMethod(method);
+        req.setBody(std::move(body));
         req.params = std::move(params);
         req.headers = std::move(headers);
-        req.body = std::move(body);
 
         zuno::Response res(socket);
 

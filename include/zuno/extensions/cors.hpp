@@ -16,7 +16,7 @@ inline Middleware cors(const std::string& origin = "*", const std::string& metho
         res.setHeader("Access-Control-Allow-Methods", methods);
         res.setHeader("Access-Control-Allow-Headers", headers);
 
-        if (req.method == "OPTIONS")
+        if (req.method() == "OPTIONS")
         {
             return res.status(204).send("");
         }

@@ -6,7 +6,7 @@ Zuno supports global and route-specific middleware functions.
 
 ```cpp
 app.use([](Request& req, Response& res, Next next) {
-    std::cout << "Incoming: " << req.method << " " << req.path << "\n";
+    std::cout << "Incoming: " << req.method() << " " << req.path() << "\n";
     next();
 });
 ```

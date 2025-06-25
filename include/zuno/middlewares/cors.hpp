@@ -5,15 +5,16 @@
 
 namespace zuno
 {
-inline Middleware cors(const std::string& origin = "*")
+inline Middleware cors(const std::string& origin = "*", const std::string& methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+                       const std::string& headers = "Content-Type, Authorization")
 {
     log::info("CORS Middleware Activated!");
 
     return [=](Request& req, Response& res, Next next)
     {
         res.setHeader("Access-Control-Allow-Origin", origin);
-        res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
-        res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        res.setHeader("Access-Control-Allow-Methods", methods);
+        res.setHeader("Access-Control-Allow-Headers", headers);
 
         if (req.method == "OPTIONS")
         {

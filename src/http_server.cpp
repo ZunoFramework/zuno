@@ -124,7 +124,10 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket)
     }
     catch (const std::exception& ex)
     {
-        return;
+        std::string reason(ex.what());
+        if (reason.compare("end of file") > -1) return;
+
+        log::error(reason);
     }
 }
 } // namespace zuno

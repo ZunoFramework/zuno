@@ -25,7 +25,6 @@ inline Middleware staticFiles(const std::string& directory, const std::string& u
     {
         std::string path = req.path;
 
-        // Si no coincide con el prefijo, pasar al siguiente middleware
         if (!path.starts_with(urlPrefix))
         {
             return next();

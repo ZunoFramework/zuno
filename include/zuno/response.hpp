@@ -17,7 +17,7 @@ class Response
 
     void send(const std::string& body)
     {
-        stream_ << "HTTP/1.1 " << statusCode_ << " " << zuno::statusText(statusCode_) << "\r\n";
+        stream_ << statusLine();
 
         for (const auto& [key, value] : headers_)
         {
@@ -60,6 +60,9 @@ class Response
         return *this;
     }
 
+    void write(const std::string& chunk);
+    void end();
+
    private:
     asio::ip::tcp::socket& socket_;
     asio::streambuf buffer_;
@@ -67,7 +70,11 @@ class Response
     std::unordered_map<std::string, std::string> headers_ = {{"X-Powered-By", std::string("Zuno/") + ZUNO_VERSION_STR},
                                                              {"Content-Type", "text/plain"}};
 
+    bool headersSent_ = false;
     int statusCode_ = 200;
+
+    std::string statusLine();
+    std::string headersToString();
 
     void flush()
     {

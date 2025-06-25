@@ -8,13 +8,10 @@ int main()
 
     app.use(zuno::cors());
     app.use(zuno::staticFiles("public"));
-    app.get("/", [](const zuno::Request& req, zuno::Response& res) { res.send("Welcome to Zuno 🚀"); });
+
+    app.get("/test/*", [](const zuno::Request& req, zuno::Response& res) { res.send("Recibido " + req.param("*")); });
 
     app.get("/hola/:name", [](const zuno::Request& req, zuno::Response& res) { res.send("Welcome to Zuno " + req.param("name") + " 🚀"); });
-
-    app.get("/ping", [](const zuno::Request& req, zuno::Response& res) { res.send("pong"); });
-
-    app.post("/login", [](const zuno::Request& req, zuno::Response& res) { res.send("POST /login received"); });
 
     app.post("/echo",
              [](const zuno::Request& req, zuno::Response& res)
@@ -30,21 +27,23 @@ int main()
                  }
              });
 
-    app.get("/secret",
-            {[](zuno::Request& req, zuno::Response& res, zuno::Next next)
-             {
-                 const auto& token = req.headers["Authorization"];
-                 if (token != "Token123")
-                 {
-                     return res.status(401).json({{"error", "Token inválido"}});
-                 }
-                 next();
-             }},
-            [](const zuno::Request& req, zuno::Response& res) { res.json({{"secret", "Aquí tienes el acceso 🤫"}}); });
-
     app.put("/update", [](const zuno::Request& req, zuno::Response& res) { res.send("PUT /update received"); });
 
     app.del("/delete", [](const zuno::Request& req, zuno::Response& res) { res.send("DELETE /delete received"); });
+
+    app.get("/stream",
+            [](const zuno::Request&, zuno::Response& res)
+            {
+                res.setHeader("Content-Type", "text/plain");
+
+                for (int i = 0; i < 5; ++i)
+                {
+                    res.write("Chunk " + std::to_string(i) + "\n");
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                }
+
+                res.end();
+            });
 
     app.listen(3456);
 }

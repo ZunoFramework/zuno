@@ -130,16 +130,23 @@ std::function<void(Request&, Response&)> App::resolveHandler(const std::string& 
 
 void App::listen(int port)
 {
-    log::log(bold + green + std::string("Zuno v") + ZUNO_VERSION_STR + reset);
+    try
+    {
+        log::log(bold + green + std::string("Zuno v") + ZUNO_VERSION_STR + reset);
 
-    asio::io_context ctx;
-    HttpServer server(ctx, port, *this);
-    server.start();
+        asio::io_context ctx;
+        HttpServer server(ctx, port, *this);
+        server.start();
 
-    log::log(bold + std::string("[ZUNO]") + reset + std::string(" 🚀 Listening on ") + cyan + std::string("http://localhost:") +
-             std::to_string(port) + reset);
+        log::log(bold + std::string("[ZUNO]") + reset + std::string(" 🚀 Listening on ") + cyan + std::string("http://localhost:") +
+                 std::to_string(port) + reset);
 
-    ctx.run();
+        ctx.run();
+    }
+    catch (std::system_error err)
+    {
+        log::error(err.what());
+    }
 }
 
 } // namespace zuno

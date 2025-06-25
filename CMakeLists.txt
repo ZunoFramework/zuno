@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(ZUNO_ENABLE_TESTS ON)
+set(ZUNO_BUILD_EXAMPLES ON)
 
 # ---📌 Version Info------------------------------------
 add_compile_definitions(
@@ -59,4 +60,10 @@ if(ZUNO_ENABLE_TESTS)
   )
 
   target_link_libraries(zuno-tests PRIVATE zuno Catch2::Catch2WithMain)
+endif()
+
+# ---🚀 Build Example-----------------------------------
+if(ZUNO_BUILD_EXAMPLES)
+  add_executable(zuno-example examples/main.cpp)
+  target_link_libraries(zuno-example PRIVATE zuno)
 endif()

@@ -35,4 +35,12 @@ std::string Response::headersToString()
     }
     return result;
 }
+
+void Response::redirect(const std::string& url, int status)
+{
+    statusCode_ = status;
+    setHeader("Location", url);
+    setHeader("Content-Type", "text/plain");
+    send("Redirecting to " + url);
+}
 } // namespace zuno

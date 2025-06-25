@@ -31,6 +31,8 @@ class Response
         flush();
     }
 
+    void redirect(const std::string& url, int status = 302);
+
     void json(const nlohmann::json& data)
     {
         std::string body = data.dump(2);

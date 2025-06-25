@@ -45,5 +45,8 @@ int main()
                 res.end();
             });
 
+    app.get("/old-route", [](const zuno::Request&, zuno::Response& res) { res.redirect("/new-route"); });
+    app.get("/new-route", [](const zuno::Request&, zuno::Response& res) { res.send("This is the new Route"); });
+
     app.listen(3456);
 }

@@ -10,6 +10,9 @@
 namespace zuno
 {
 
+using SendFunc = std::function<void(const std::string&)>;
+using SendWrapper = std::function<void(const std::string&, SendFunc)>;
+
 class Response
 {
    public:
@@ -17,19 +20,33 @@ class Response
 
     void send(const std::string& body)
     {
-        stream_ << statusLine();
-
-        for (const auto& [key, value] : headers_)
+        auto doSend = [this](const std::string& finalBody)
         {
-            stream_ << key << ": " << value << "\r\n";
-        }
+            stream_ << statusLine();
 
-        stream_ << "Content-Length: " << body.size() << "\r\n"
-                << "charset=utf-8\r\n"
-                << "\r\n"
-                << body;
-        flush();
+            for (const auto& [key, value] : headers_)
+            {
+                stream_ << key << ": " << value << "\r\n";
+            }
+
+            stream_ << "Content-Length: " << finalBody.size() << "\r\n"
+                    << "charset=utf-8\r\n"
+                    << "\r\n"
+                    << finalBody;
+            flush();
+        };
+
+        if (sendWrapper_)
+        {
+            sendWrapper_(body, doSend);
+        }
+        else
+        {
+            doSend(body);
+        }
     }
+
+    void wrapSend(SendWrapper wrapper);
 
     void redirect(const std::string& url, int status = 302);
 
@@ -71,6 +88,8 @@ class Response
     std::ostream stream_;
     std::unordered_map<std::string, std::string> headers_ = {{"X-Powered-By", std::string("Zuno/") + ZUNO_VERSION_STR},
                                                              {"Content-Type", "text/plain"}};
+
+    SendWrapper sendWrapper_ = nullptr;
 
     bool headersSent_ = false;
     int statusCode_ = 200;

@@ -43,4 +43,9 @@ void Response::redirect(const std::string& url, int status)
     setHeader("Content-Type", "text/plain");
     send("Redirecting to " + url);
 }
+
+void Response::wrapSend(SendWrapper wrapper)
+{
+    sendWrapper_ = std::move(wrapper);
+}
 } // namespace zuno

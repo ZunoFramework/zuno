@@ -1,3 +1,4 @@
+#include <zuno/middlewares/compression.hpp>
 #include <zuno/middlewares/cors.hpp>
 #include <zuno/middlewares/static.hpp>
 #include <zuno/zuno.hpp>
@@ -8,6 +9,7 @@ int main()
 
     app.use(zuno::cors());
     app.use(zuno::staticFiles("public"));
+    app.use(zuno::compression());
 
     app.get("/test/*", [](const zuno::Request& req, zuno::Response& res) { res.send("Recibido " + req.param("*")); });
 

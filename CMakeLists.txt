@@ -41,6 +41,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann_json)
 
+FetchContent_Declare(
+  brotli
+  GIT_REPOSITORY https://github.com/google/brotli.git
+  GIT_TAG        v1.1.0
+)
+FetchContent_MakeAvailable(brotli)
+
 # ---📁 Source Files------------------------------------
 file(GLOB_RECURSE ZUNO_SOURCES CONFIGURE_DEPENDS src/*.cpp)
 file(GLOB_RECURSE ZUNO_HEADERS CONFIGURE_DEPENDS include/*.hpp)
@@ -51,6 +58,7 @@ add_library(zuno STATIC ${ZUNO_SOURCES} ${ZUNO_HEADERS})
 target_include_directories(zuno PUBLIC include)
 target_compile_definitions(zuno PUBLIC ASIO_STANDALONE)
 target_link_libraries(zuno PUBLIC nlohmann_json::nlohmann_json)
+target_link_libraries(zuno PRIVATE brotlienc)
 
 
 # ---🧪 Unit Tests--------------------------------------

@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include <unordered_map>
+#include "zuno/logger.hpp"
 
 namespace zuno
 {
@@ -11,7 +12,10 @@ namespace zuno
 class Request
 {
    public:
-    Request(const std::string& path, asio::ip::tcp::socket& socket) : path(path), socket_(socket) {}
+    Request(const std::string& path, asio::ip::tcp::socket& socket) : path(path), socket_(socket)
+    {
+        ip = socket_.remote_endpoint().address().to_string();
+    }
 
     std::string param(const std::string& name) const
     {
@@ -31,6 +35,7 @@ class Request
     std::string body;
     std::string method;
     std::string path;
+    std::string ip;
     std::unordered_map<std::string, std::string> headers;
     std::unordered_map<std::string, std::string> params;
 

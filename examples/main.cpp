@@ -1,5 +1,6 @@
 #include <zuno/extensions/compression.hpp>
 #include <zuno/extensions/cors.hpp>
+#include <zuno/extensions/rate-limit.hpp>
 #include <zuno/extensions/static.hpp>
 #include <zuno/zuno.hpp>
 
@@ -8,10 +9,10 @@ int main()
     zuno::App app;
 
     app.use(zuno::cors());
-    app.use(zuno::staticFiles("public"));
+    app.use(zuno::staticFiles("public", "/static"));
     app.use(zuno::compression());
 
-    app.get("/test/*", [](const zuno::Request& req, zuno::Response& res) { res.send("Recibido " + req.param("*")); });
+    app.get("/rate-test", {zuno::rateLimit({10, 30000})}, [](const zuno::Request& req, zuno::Response& res) { res.send("Rate Limit Test"); });
 
     app.get("/hola/:name", [](const zuno::Request& req, zuno::Response& res) { res.send("Welcome to Zuno " + req.param("name") + " 🚀"); });
 

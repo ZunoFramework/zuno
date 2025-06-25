@@ -30,7 +30,6 @@ class Response
             }
 
             stream_ << "Content-Length: " << finalBody.size() << "\r\n"
-                    << "charset=utf-8\r\n"
                     << "\r\n"
                     << finalBody;
             flush();
@@ -87,7 +86,7 @@ class Response
     asio::streambuf buffer_;
     std::ostream stream_;
     std::unordered_map<std::string, std::string> headers_ = {{"X-Powered-By", std::string("Zuno/") + ZUNO_VERSION_STR},
-                                                             {"Content-Type", "text/plain"}};
+                                                             {"Content-Type", "text/plain;charset=utf-8"}};
 
     SendWrapper sendWrapper_ = nullptr;
 

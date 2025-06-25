@@ -8,7 +8,7 @@ namespace zuno
 inline Middleware cors(const std::string& origin = "*", const std::string& methods = "GET, POST, PUT, DELETE, OPTIONS, PATCH",
                        const std::string& headers = "Content-Type, Authorization")
 {
-    log::info("CORS Middleware Activated!");
+    log::info("CORS Extension Activated!");
 
     return [=](Request& req, Response& res, Next next)
     {

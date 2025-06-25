@@ -19,6 +19,7 @@ inline std::string mimeType(const std::string& ext)
 
 inline Middleware staticFiles(const std::string& directory, const std::string& urlPrefix = "/")
 {
+    log::info("Static Serve Extension Activated!");
     namespace fs = std::filesystem;
 
     return [=](Request& req, Response& res, Next next)

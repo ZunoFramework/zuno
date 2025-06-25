@@ -23,16 +23,18 @@ inline std::string brotliCompress(const std::string& input)
 
 inline Middleware compression(double minRatio = 0.8)
 {
+    log::info("Compression Extension Activated!");
     return [=](Request& req, Response& res, Next next)
     {
-        res.wrapSend(
-            [&res, &req, &minRatio](const std::string& body, auto originalSend)
-            {
-                if (req.headers.at("accept-encoding").find("br") == std::string::npos)
-                {
-                    return originalSend(body);
-                }
+        auto it = req.headers.find("accept-encoding");
+        if (it == req.headers.end() || it->second.find("br") == std::string::npos)
+        {
+            return next();
+        }
 
+        res.wrapSend(
+            [&res, minRatio](const std::string& body, auto originalSend)
+            {
                 if (body.size() < 256)
                 {
                     return originalSend(body);

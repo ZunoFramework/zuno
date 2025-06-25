@@ -1,6 +1,6 @@
-#include <zuno/middlewares/compression.hpp>
-#include <zuno/middlewares/cors.hpp>
-#include <zuno/middlewares/static.hpp>
+#include <zuno/extensions/compression.hpp>
+#include <zuno/extensions/cors.hpp>
+#include <zuno/extensions/static.hpp>
 #include <zuno/zuno.hpp>
 
 int main()

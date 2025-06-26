@@ -4,69 +4,9 @@ project(zuno VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(ZUNO_ENABLE_TESTS ON)
-set(ZUNO_BUILD_EXAMPLES ON)
-
-# ---📌 Version Info------------------------------------
-add_compile_definitions(
-  ZUNO_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
-  ZUNO_VERSION_MINOR=${PROJECT_VERSION_MINOR}
-  ZUNO_VERSION_PATCH=${PROJECT_VERSION_PATCH}
-)
-
-if(ZUNO_ENABLE_TESTS)
-  add_compile_definitions(ZUNO_ENABLE_TESTS)
-endif()
-
-# ---📦 Dependencies------------------------------------
-include(FetchContent)
-
-## Catch2 (testing)
-if(ZUNO_ENABLE_TESTS)
-  FetchContent_Declare(
-    catch2
-    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG v3.5.3
-    DOWNLOAD_EXTRACT_TIMESTAMP true
-  )
-  FetchContent_MakeAvailable(catch2)
-endif()
-
-## OpenSSL
-FetchContent_Declare(
-  openssl
-  URL https://www.openssl.org/source/openssl-3.0.13.tar.gz
-  DOWNLOAD_EXTRACT_TIMESTAMP true
-)
-
-FetchContent_MakeAvailable(openssl)
-
-## asio standalone
-FetchContent_Declare(
-  asio
-  GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
-  GIT_TAG        master
-  DOWNLOAD_EXTRACT_TIMESTAMP true
-)
-
-FetchContent_MakeAvailable(asio)
-
-## nlohmann::json
-FetchContent_Declare(
-  nlohmann_json
-  GIT_REPOSITORY https://github.com/nlohmann/json.git
-  GIT_TAG v3.11.3
-  DOWNLOAD_EXTRACT_TIMESTAMP true
-)
-FetchContent_MakeAvailable(nlohmann_json)
-
-# brotli compress
-FetchContent_Declare(
-  brotli
-  GIT_REPOSITORY https://github.com/google/brotli.git
-  GIT_TAG        v1.1.0
-)
-FetchContent_MakeAvailable(brotli)
+include(cmake/version.cmake)
+include(cmake/options.cmake)
+include(cmake/dependencies.cmake)
 
 # ---📁 Source Files------------------------------------
 file(GLOB_RECURSE ZUNO_SOURCES CONFIGURE_DEPENDS src/*.cpp)
@@ -85,7 +25,6 @@ if(ZUNO_ENABLE_TESTS)
   add_executable(zuno-tests
     tests/route_test.cpp
   )
-
   target_link_libraries(zuno-tests PRIVATE zuno Catch2::Catch2WithMain)
 endif()
 
@@ -94,3 +33,14 @@ if(ZUNO_BUILD_EXAMPLES)
   add_executable(zuno-example examples/main.cpp)
   target_link_libraries(zuno-example PRIVATE zuno)
 endif()
+
+# ---📦 Install Targets---------------------------------
+install(TARGETS zuno
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+install(FILES ${ZUNO_HEADERS}
+  DESTINATION include/zuno
+)

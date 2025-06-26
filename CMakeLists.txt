@@ -32,6 +32,25 @@ if(ZUNO_ENABLE_TESTS)
   FetchContent_MakeAvailable(catch2)
 endif()
 
+## OpenSSL
+FetchContent_Declare(
+  openssl
+  URL https://www.openssl.org/source/openssl-3.0.13.tar.gz
+  DOWNLOAD_EXTRACT_TIMESTAMP true
+)
+
+FetchContent_MakeAvailable(openssl)
+
+## asio standalone
+FetchContent_Declare(
+  asio
+  GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
+  GIT_TAG        master
+  DOWNLOAD_EXTRACT_TIMESTAMP true
+)
+
+FetchContent_MakeAvailable(asio)
+
 ## nlohmann::json
 FetchContent_Declare(
   nlohmann_json
@@ -41,6 +60,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann_json)
 
+# brotli compress
 FetchContent_Declare(
   brotli
   GIT_REPOSITORY https://github.com/google/brotli.git
@@ -58,8 +78,7 @@ add_library(zuno STATIC ${ZUNO_SOURCES} ${ZUNO_HEADERS})
 target_include_directories(zuno PUBLIC include)
 target_compile_definitions(zuno PUBLIC ASIO_STANDALONE)
 target_link_libraries(zuno PUBLIC nlohmann_json::nlohmann_json)
-target_link_libraries(zuno PRIVATE brotlienc)
-
+target_link_libraries(zuno PRIVATE brotlienc ssl crypto)
 
 # ---🧪 Unit Tests--------------------------------------
 if(ZUNO_ENABLE_TESTS)

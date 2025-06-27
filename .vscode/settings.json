@@ -84,7 +84,10 @@
         "future": "cpp",
         "iomanip": "cpp",
         "fstream": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "any": "cpp",
+        "coroutine": "cpp",
+        "numeric": "cpp"
     },
     "C_Cpp.clang_format_style": "file",
     "C_Cpp.errorSquiggles": "enabled",

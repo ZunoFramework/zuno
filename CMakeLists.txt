@@ -33,9 +33,7 @@ endif()
 # ---🚀 Build Example-----------------------------------
 if(ZUNO_BUILD_EXAMPLES)
   add_executable(zuno-example examples/main.cpp)
-  add_executable(zuno-example-tls examples/main_tls.cpp)
   target_link_libraries(zuno-example PRIVATE zuno)
-  target_link_libraries(zuno-example-tls PRIVATE zuno)
 endif()
 
 # ---📦 Install Targets---------------------------------

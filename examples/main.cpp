@@ -9,12 +9,12 @@ int main()
     zuno::App app;
 
     app.use(zuno::cors());
-    app.use(zuno::staticFiles("public", "/static"));
+    app.use(zuno::staticFiles("public", "/"));
     app.use(zuno::compression());
 
     app.get("/rate-test", {zuno::rateLimit({10, 30000})}, [](const zuno::Request& req, zuno::Response& res) { res.send("Rate Limit Test"); });
 
-    app.get("/hola/:name", [](const zuno::Request& req, zuno::Response& res) { res.send("Welcome to Zuno " + req.param("name") + " 🚀"); });
+    app.get("/ping", [](const zuno::Request& req, zuno::Response& res) { res.send("Pong! 🚀"); });
 
     app.post("/echo",
              [](const zuno::Request& req, zuno::Response& res)

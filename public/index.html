@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 20px;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #fff;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Documentation</h1>
+    <p>Welcome to the API documentation. Below is a list of all available endpoints:</p>
+
+    <h2>Endpoints</h2>
+    <ul>
+        <li><a href="/index.html">GET /</a> - This documentation page</li>
+        <li><a href="/rate-test">GET /rate-test</a> - Rate Limit Test (10 requests per 30 seconds)</li>
+        <li><a href="/ping">GET /ping</a> - Returns "Pong! 🚀"</li>
+        <li><a href="#">POST /echo</a> - Echoes the JSON body of the request</li>
+        <li><a href="#">PUT /update</a> - Returns "PUT /update received"</li>
+        <li><a href="#">DELETE /delete</a> - Returns "DELETE /delete received"</li>
+        <li><a href="/stream">GET /stream</a> - Streams 5 chunks of data with a delay of 500ms each</li>
+        <li><a href="/old-route">GET /old-route</a> - Redirects to /new-route</li>
+        <li><a href="/new-route">GET /new-route</a> - Returns "This is the new Route"</li>
+    </ul>
+
+    <h2>Rate Limiting</h2>
+    <p>The /rate-test endpoint has a rate limit of 10 requests per 30 seconds.</p>
+</body>
+</html>

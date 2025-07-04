@@ -1,5 +1,3 @@
-# .github/workflows/build.yml
-
 name: Build Zuno
 
 on:
@@ -13,14 +11,92 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout código
+    - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Instalar CMake, GCC, Make
+    - name: Install CMake, GCC, Make
       run: sudo apt update && sudo apt install -y cmake build-essential
-    
-    - name: Instalar asio
+
+    - name: Install Asio
       run: sudo apt install libasio-dev
 
-    - name: Crear directorio build
-      run: mkdir build && cd build && cmake .. && make
+    - name: Create build directory and compile
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
+
+    - name: Get Zuno version
+      id: get_version
+      run: |
+        VERSION=$(./build/print_version)
+        echo "ZUNO_VERSION=$VERSION" >> $GITHUB_ENV
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install CMake, GCC, Make
+      run: sudo apt update && sudo apt install -y cmake build-essential
+
+    - name: Install Asio
+      run: sudo apt install libasio-dev
+
+    - name: Create build directory and compile
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
+
+    - name: Get Zuno version
+      id: get_version
+      run: |
+        VERSION=$(./build/print_version)
+        echo "ZUNO_VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Copy compiled artifact
+      run: |
+        mkdir -p build
+        cp build/libzuno.a ./build/
+    
+    - name: Generate changelog from commits
+      id: changelog
+      run: |
+        LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        if [ -z "$LAST_TAG" ]; then
+          LOG=$(git log --pretty=format:"- %s" --no-merges)
+        else
+          LOG=$(git log "$LAST_TAG"..HEAD --pretty=format:"- %s" --no-merges)
+        fi
+        echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+        echo "$LOG" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+
+    - name: Create GitHub release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ env.ZUNO_VERSION }}
+        name: Zuno Release v${{ env.ZUNO_VERSION }}
+        body: |
+          🚀 New release of the Zuno library.
+          - Version: v${{ env.ZUNO_VERSION }}
+          
+          ## Changes
+          ${{ env.CHANGELOG }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload compiled library
+      uses: softprops/action-gh-release@v1
+      with:
+        files: build/libzuno.a
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

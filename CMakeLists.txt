@@ -34,6 +34,10 @@ if(ZUNO_BUILD_EXAMPLES)
   target_link_libraries(zuno-example PRIVATE zuno)
 endif()
 
+# --- Build Tools------------------------------------------
+add_executable(print_version tools/print_version.cpp)
+target_include_directories(print_version PRIVATE ${CMAKE_SOURCE_DIR}/include)
+
 # ---📦 Install Targets---------------------------------
 install(TARGETS zuno
   LIBRARY DESTINATION lib

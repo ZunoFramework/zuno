@@ -1,5 +1,6 @@
 #pragma once
 
+#include <asio/ssl.hpp>
 #include <functional>
 #include <string>
 #include <unordered_map>
@@ -10,6 +11,15 @@ namespace zuno
 {
 
 class HttpServer;
+
+struct TLSConfig
+{
+    std::string certFile;
+    std::string keyFile;
+    std::string dhParamsFile;       // Opcional: forward secrecy
+    bool requireClientCert = false; // to mTLS
+    std::string caCertFile;         // to verify clients if mTLS
+};
 
 class App
 {
@@ -35,6 +45,8 @@ class App
         middlewares_.push_back(std::move(m));
     }
 
+    void useTLS(const TLSConfig& config);
+
     void listen(int port);
 
     std::function<void(Request&, Response&)> resolveHandler(const std::string& method, const std::string& path,
@@ -43,6 +55,8 @@ class App
    private:
     std::unordered_map<std::string, std::vector<Route>> routes;
     std::vector<Middleware> middlewares_;
+    bool tlsEnabled_ = false;
+    std::shared_ptr<asio::ssl::context> tlsContext_;
 
     void addRoute(const std::string& method, const std::string& path, Handler handler);
     void addRoute(const std::string& method, const std::string& path, std::initializer_list<Middleware> mws, Handler handler);

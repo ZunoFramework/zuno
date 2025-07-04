@@ -3,12 +3,14 @@
 #include "zuno/logger.hpp"
 #include "zuno/request.hpp"
 #include "zuno/response.hpp"
+#include "zuno/tcp_stream_adapter.hpp"
+#include "zuno/tls_stream_adapter.hpp"
 
 namespace zuno
 {
 
-HttpServer::HttpServer(asio::io_context& ctx, int port, const App& app)
-    : acceptor_(ctx, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)), socket_(ctx), app_(app)
+HttpServer::HttpServer(asio::io_context& ctx, int port, const App& app, std::shared_ptr<asio::ssl::context> sslCtx)
+    : io_(ctx), acceptor_(ctx, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)), socket_(ctx), sslContext_(sslCtx), app_(app)
 {
 }
 
@@ -19,29 +21,54 @@ void HttpServer::start()
 
 void HttpServer::doAccept()
 {
-    acceptor_.async_accept(socket_,
-                           [this](std::error_code ec)
-                           {
-                               if (!ec)
+    if (app_.tlsEnabled_ && sslContext_)
+    {
+        auto tlsSocket = std::make_shared<asio::ssl::stream<asio::ip::tcp::socket>>(io_, *sslContext_);
+        acceptor_.async_accept(tlsSocket->lowest_layer(),
+                               [this, tlsSocket](std::error_code ec)
                                {
-                                   handleConnection(std::move(socket_));
-                               }
-                               doAccept();
-                           });
+                                   if (!ec)
+                                   {
+                                       tlsSocket->async_handshake(asio::ssl::stream_base::server,
+                                                                  [this, tlsSocket](std::error_code ec)
+                                                                  {
+                                                                      if (!ec)
+                                                                      {
+                                                                          auto stream = std::make_shared<TlsStreamAdapter>(tlsSocket);
+                                                                          handleConnection(stream);
+                                                                      }
+                                                                  });
+                                   }
+                                   doAccept();
+                               });
+    }
+    else
+    {
+        acceptor_.async_accept(socket_,
+                               [this](std::error_code ec)
+                               {
+                                   if (!ec)
+                                   {
+                                       auto stream = std::make_shared<TcpStreamAdapter>(std::move(socket_));
+                                       handleConnection(stream);
+                                   }
+                                   doAccept();
+                               });
+    }
 }
 
-void HttpServer::handleConnection(asio::ip::tcp::socket socket)
+void HttpServer::handleConnection(StreamAdapterPtr stream)
 {
     try
     {
         auto start = std::chrono::steady_clock::now();
 
         asio::streambuf buffer;
-        asio::read_until(socket, buffer, "\r\n\r\n");
+        stream->read_until(buffer, "\r\n\r\n");
 
-        std::istream stream(&buffer);
+        std::istream streamIn(&buffer);
         std::string requestLine;
-        std::getline(stream, requestLine);
+        std::getline(streamIn, requestLine);
         if (!requestLine.empty() && requestLine.back() == '\r') requestLine.pop_back();
 
         std::string method, path, version;
@@ -50,7 +77,7 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket)
 
         std::unordered_map<std::string, std::string> headers;
         std::string line;
-        while (std::getline(stream, line) && line != "\r")
+        while (std::getline(streamIn, line) && line != "\r")
         {
             if (!line.empty() && line.back() == '\r') line.pop_back();
             auto pos = line.find(":");
@@ -76,7 +103,7 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket)
             std::size_t remaining = (contentLength > already) ? (contentLength - already) : 0;
             if (remaining > 0)
             {
-                asio::read(socket, buffer, asio::transfer_exactly(remaining));
+                stream->read(buffer, remaining);
             }
 
             std::istream bodyStream(&buffer);
@@ -87,13 +114,13 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket)
         std::unordered_map<std::string, std::string> params;
         auto handler = app_.resolveHandler(method, path, params);
 
-        zuno::Request req(path, socket);
+        zuno::Request req(path, stream);
         req.setMethod(method);
         req.setBody(std::move(body));
         req.params = std::move(params);
         req.headers = std::move(headers);
 
-        zuno::Response res(socket);
+        zuno::Response res(stream);
 
         std::size_t index = 0;
         std::function<void()> next = [&]()
@@ -123,9 +150,10 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket)
     catch (const std::exception& ex)
     {
         std::string reason(ex.what());
-        if (reason.compare("end of file") > -1) return;
+        if (reason.find("end of file") != std::string::npos) return;
 
         log::error("{}", reason);
     }
 }
+
 } // namespace zuno

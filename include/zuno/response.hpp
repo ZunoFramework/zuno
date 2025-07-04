@@ -1,9 +1,10 @@
 #pragma once
 
-#include <asio.hpp>
 #include <nlohmann/json.hpp>
 #include <ostream>
 #include <string>
+#include <unordered_map>
+#include "zuno/stream_adapter.hpp"
 #include "zuno/utils.hpp"
 #include "zuno/version.hpp"
 
@@ -16,23 +17,24 @@ using SendWrapper = std::function<void(const std::string&, SendFunc)>;
 class Response
 {
    public:
-    explicit Response(asio::ip::tcp::socket& socket) : socket_(socket), stream_(&buffer_) {}
+    explicit Response(StreamAdapterPtr stream) : stream_(std::move(stream)), buffer_(), ostream_(&buffer_) {}
 
     void send(const std::string& body)
     {
         body_ = body;
         auto doSend = [this](const std::string& finalBody)
         {
-            stream_ << statusLine();
+            ostream_ << statusLine();
 
             for (const auto& [key, value] : headers_)
             {
-                stream_ << key << ": " << value << "\r\n";
+                ostream_ << key << ": " << value << "\r\n";
             }
 
-            stream_ << "Content-Length: " << finalBody.size() << "\r\n"
-                    << "\r\n"
-                    << finalBody;
+            ostream_ << "Content-Length: " << finalBody.size() << "\r\n"
+                     << "\r\n"
+                     << finalBody;
+
             flush();
         };
 
@@ -46,9 +48,17 @@ class Response
         }
     }
 
-    void wrapSend(SendWrapper wrapper);
+    void wrapSend(SendWrapper wrapper)
+    {
+        sendWrapper_ = std::move(wrapper);
+    }
 
-    void redirect(const std::string& url, int status = 302);
+    void redirect(const std::string& url, int status = 302)
+    {
+        statusCode_ = status;
+        setHeader("Location", url);
+        send("");
+    }
 
     void json(const nlohmann::json& data)
     {
@@ -62,7 +72,7 @@ class Response
         return statusCode_;
     }
 
-    std::string body()
+    std::string body() const
     {
         return body_;
     }
@@ -89,28 +99,37 @@ class Response
         return *this;
     }
 
-    void write(const std::string& chunk);
-    void end();
+    void write(const std::string& chunk)
+    {
+        ostream_ << chunk;
+    }
+
+    void end()
+    {
+        flush();
+    }
 
    private:
-    asio::ip::tcp::socket& socket_;
+    StreamAdapterPtr stream_;
     asio::streambuf buffer_;
-    std::ostream stream_;
+    std::ostream ostream_;
     std::string body_;
     std::unordered_map<std::string, std::string> headers_ = {{"X-Powered-By", std::string("Zuno/") + ZUNO_VERSION_STR},
                                                              {"Content-Type", "text/plain;charset=utf-8"}};
 
     SendWrapper sendWrapper_ = nullptr;
-
     bool headersSent_ = false;
     int statusCode_ = 200;
 
-    std::string statusLine();
-    std::string headersToString();
+    std::string statusLine()
+    {
+        return "HTTP/1.1 " + std::to_string(statusCode_) + " " + statusText() + "\r\n";
+    }
 
     void flush()
     {
-        asio::write(socket_, buffer_);
+        stream_->write(asio::buffer_cast<const char*>(buffer_.data()), buffer_.size());
+        buffer_.consume(buffer_.size());
     }
 };
 

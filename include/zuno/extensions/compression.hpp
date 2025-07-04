@@ -2,6 +2,7 @@
 #include <brotli/encode.h>
 #include <sstream>
 #include "zuno/common.hpp"
+#include "zuno/logger.hpp"
 
 namespace zuno
 {

@@ -8,6 +8,9 @@ int main()
 {
     zuno::App app;
 
+    // Uncomment the following line to enable TLS
+    // app.useTLS({"examples/certs/server.crt", "examples/certs/server.key"});
+
     app.use(zuno::cors());
     app.use(zuno::staticFiles({"public", "/", true, 36}));
     app.use(zuno::compression());

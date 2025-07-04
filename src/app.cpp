@@ -134,18 +134,48 @@ void App::listen(int port)
         log::log(fg(fmt::color::magenta) | fmt::emphasis::bold, "Zuno v{}\n", ZUNO_VERSION_STR);
 
         asio::io_context ctx;
-        HttpServer server(ctx, port, *this);
+        HttpServer server(ctx, port, *this, tlsContext_);
         server.start();
 
         log::log(fg(fmt::color::white) | fmt::emphasis::bold, "[ZUNO] ");
         log::log("🚀 Listening on: ");
-        log::log(fg(fmt::color::cyan) | fmt::emphasis::bold, "http://localhost:{}\n", port);
+        if (tlsEnabled_)
+        {
+            log::log(fg(fmt::color::cyan) | fmt::emphasis::bold, "https://localhost:{}\n", port);
+        }
+        else
+        {
+            log::log(fg(fmt::color::cyan) | fmt::emphasis::bold, "http://localhost:{}\n", port);
+        }
 
         ctx.run();
     }
     catch (std::system_error err)
     {
         log::error("{}", err.what());
+    }
+}
+
+void App::useTLS(const TLSConfig& config)
+{
+    tlsEnabled_ = true;
+    tlsContext_ = std::make_shared<asio::ssl::context>(asio::ssl::context::tlsv12_server);
+
+    tlsContext_->use_certificate_chain_file(config.certFile);
+    tlsContext_->use_private_key_file(config.keyFile, asio::ssl::context::pem);
+
+    if (!config.dhParamsFile.empty())
+    {
+        tlsContext_->use_tmp_dh_file(config.dhParamsFile);
+    }
+
+    if (config.requireClientCert)
+    {
+        tlsContext_->set_verify_mode(asio::ssl::verify_peer | asio::ssl::verify_fail_if_no_peer_cert);
+        if (!config.caCertFile.empty())
+        {
+            tlsContext_->load_verify_file(config.caCertFile);
+        }
     }
 }
 

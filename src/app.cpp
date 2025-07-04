@@ -1,11 +1,11 @@
 #include "zuno/app.hpp"
+#include <fmt/color.h>
+#include <fmt/core.h>
 #include <algorithm>
 #include <asio.hpp>
 #include "zuno/http_server.hpp"
 #include "zuno/logger.hpp"
 #include "zuno/route.hpp"
-
-using namespace zuno::log::color;
 
 namespace zuno
 {
@@ -132,20 +132,21 @@ void App::listen(int port)
 {
     try
     {
-        log::log(bold + green + std::string("Zuno v") + ZUNO_VERSION_STR + reset);
+        fmt::print(fg(fmt::color::magenta) | fmt::emphasis::bold, "Zuno v{}\n", ZUNO_VERSION_STR);
 
         asio::io_context ctx;
         HttpServer server(ctx, port, *this);
         server.start();
 
-        log::log(bold + std::string("[ZUNO]") + reset + std::string(" 🚀 Listening on ") + cyan + std::string("http://localhost:") +
-                 std::to_string(port) + reset);
+        fmt::print(fg(fmt::color::white) | fmt::emphasis::bold, "[ZUNO] ");
+        fmt::print("🚀 Listening on: ");
+        fmt::print(fg(fmt::color::cyan) | fmt::emphasis::bold, "http://localhost:{}\n", port);
 
         ctx.run();
     }
     catch (std::system_error err)
     {
-        log::error(err.what());
+        log::error("{}", err.what());
     }
 }
 

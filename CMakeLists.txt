@@ -4,8 +4,6 @@ project(zuno VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_BUILD_TYPE "Debug")
-
 include(cmake/version.cmake)
 include(cmake/options.cmake)
 include(cmake/dependencies.cmake)
@@ -19,7 +17,7 @@ add_library(zuno STATIC ${ZUNO_SOURCES} ${ZUNO_HEADERS})
 
 target_include_directories(zuno PUBLIC include)
 target_compile_definitions(zuno PUBLIC ASIO_STANDALONE)
-target_link_libraries(zuno PUBLIC nlohmann_json::nlohmann_json brotlienc)
+target_link_libraries(zuno PUBLIC nlohmann_json::nlohmann_json brotlienc fmt::fmt)
 target_link_libraries(zuno PRIVATE ssl crypto)
 
 # ---🧪 Unit Tests--------------------------------------

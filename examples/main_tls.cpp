@@ -8,6 +8,8 @@ int main()
 {
     zuno::App app;
 
+    app.useTLS({"examples/certs/server.crt", "examples/certs/server.key"});
+
     app.use(zuno::cors());
     app.use(zuno::staticFiles({"public", "/", true, 36}));
     app.use(zuno::compression());
@@ -51,5 +53,5 @@ int main()
     app.get("/old-route", [](const zuno::Request&, zuno::Response& res) { res.redirect("/new-route"); });
     app.get("/new-route", [](const zuno::Request&, zuno::Response& res) { res.send("This is the new Route"); });
 
-    app.listen(3456);
+    app.listen(443);
 }

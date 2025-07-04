@@ -19,16 +19,20 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(openssl)
+find_package(OpenSSL REQUIRED)
 
 ## asio standalone
 FetchContent_Declare(
   asio
   GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
-  GIT_TAG        master
+  GIT_TAG        asio-1-34-2
   DOWNLOAD_EXTRACT_TIMESTAMP true
 )
 
 FetchContent_MakeAvailable(asio)
+
+add_compile_definitions(ASIO_STANDALONE)
+add_compile_definitions(ASIO_HAS_SSL)
 
 ## nlohmann::json
 FetchContent_Declare(

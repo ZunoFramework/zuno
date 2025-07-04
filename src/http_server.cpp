@@ -150,7 +150,7 @@ void HttpServer::handleConnection(StreamAdapterPtr stream)
     catch (const std::exception& ex)
     {
         std::string reason(ex.what());
-        if (reason.find("end of file") != std::string::npos) return;
+        if (reason.find("End of file") != std::string::npos) return;
 
         log::error("{}", reason);
     }

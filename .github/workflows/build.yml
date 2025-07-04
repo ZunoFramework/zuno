@@ -7,65 +7,103 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  version:
     runs-on: ubuntu-latest
+    outputs:
+      zuno_version: ${{ steps.get_version.outputs.version }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: sudo apt update && sudo apt install -y cmake build-essential libasio-dev libssl-dev
+
+    - name: Build and extract version
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        make
+      shell: bash
+
+    - name: Get Zuno version
+      id: get_version
+      run: |
+        cd build
+        VERSION=$(./print_version)
+        echo "ZUNO_VERSION=$VERSION" >> $GITHUB_ENV
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  build:
+    needs: version
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    env:
+      ZUNO_VERSION: ${{ needs.version.outputs.zuno_version }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install CMake, GCC, Make
-      run: sudo apt update && sudo apt install -y cmake build-essential
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: sudo apt update && sudo apt install -y cmake build-essential libasio-dev libssl-dev
 
-    - name: Install Asio
-      run: sudo apt install libasio-dev
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install cmake openssl@3
+        echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> $GITHUB_ENV
+        echo "CMAKE_INCLUDE_PATH=$(brew --prefix openssl@3)/include" >> $GITHUB_ENV
+        echo "CMAKE_LIBRARY_PATH=$(brew --prefix openssl@3)/lib" >> $GITHUB_ENV
 
-    - name: Create build directory and compile
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: choco install cmake openssl.light
+
+    - name: Build project
       run: |
         mkdir build
         cd build
-        cmake ..
-        make
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake --build . --config Release
 
-    - name: Get Zuno version
-      id: get_version
-      run: |
-        VERSION=$(./build/print_version)
-        echo "ZUNO_VERSION=$VERSION" >> $GITHUB_ENV
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: zuno-${{ runner.os }}-${{ env.ZUNO_VERSION }}
+        path: |
+          build/*.a
+          build/*.lib
+          build/*.dll
+          build/*.dylib
+          build/*.so
+          build/*.h
+          !**/*.cpp
 
   release:
-    needs: build
+    needs: [version, build]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    env:
+      ZUNO_VERSION: ${{ needs.version.outputs.zuno_version }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install CMake, GCC, Make
-      run: sudo apt update && sudo apt install -y cmake build-essential
-
-    - name: Install Asio
-      run: sudo apt install libasio-dev
-
-    - name: Create build directory and compile
+    - name: Configure Git
       run: |
-        mkdir build
-        cd build
-        cmake ..
-        make
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
 
-    - name: Get Zuno version
-      id: get_version
+    - name: Create Git tag
       run: |
-        VERSION=$(./build/print_version)
-        echo "ZUNO_VERSION=$VERSION" >> $GITHUB_ENV
+        git fetch --tags
+        git tag v${{ env.ZUNO_VERSION }}
+        git push origin v${{ env.ZUNO_VERSION }}
 
-    - name: Copy compiled artifact
-      run: |
-        mkdir -p build
-        cp build/libzuno.a ./build/
-    
     - name: Generate changelog from commits
       id: changelog
       run: |
@@ -79,6 +117,10 @@ jobs:
         echo "$LOG" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
 
+    - name: Download all build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./artifacts
 
     - name: Create GitHub release
       uses: softprops/action-gh-release@v1
@@ -88,15 +130,16 @@ jobs:
         body: |
           🚀 New release of the Zuno library.
           - Version: v${{ env.ZUNO_VERSION }}
-          
+
           ## Changes
           ${{ env.CHANGELOG }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload compiled library
+    - name: Upload compiled libraries
       uses: softprops/action-gh-release@v1
       with:
-        files: build/libzuno.a
+        tag_name: v${{ env.ZUNO_VERSION }}
+        files: artifacts/**/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

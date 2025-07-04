@@ -128,7 +128,9 @@ class Response
 
     void flush()
     {
-        stream_->write(asio::buffer_cast<const char*>(buffer_.data()), buffer_.size());
+        auto begin = asio::buffers_begin(buffer_.data());
+        auto end = asio::buffers_end(buffer_.data());
+        stream_->write(&(*begin), std::distance(begin, end));
         buffer_.consume(buffer_.size());
     }
 };

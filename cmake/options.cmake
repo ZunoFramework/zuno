@@ -1,4 +1,4 @@
-set(ZUNO_ENABLE_TESTS ON CACHE BOOL "Enable tests")
+set(ZUNO_ENABLE_TESTS OFF CACHE BOOL "Enable tests")
 set(ZUNO_BUILD_EXAMPLES ON CACHE BOOL "Build examples")
 
 

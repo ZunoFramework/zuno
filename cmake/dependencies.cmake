@@ -52,7 +52,7 @@ FetchContent_MakeAvailable(brotli)
 FetchContent_Declare(
   fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG        8.1.1
+  GIT_TAG        11.2.0
   DOWNLOAD_EXTRACT_TIMESTAMP true
 )
 FetchContent_MakeAvailable(fmt)

@@ -42,6 +42,18 @@ inline void request(const std::string& method, const std::string& path, int stat
     fmt::print(fg(fmt::color::magenta), " {} ms\n", durationMs);
 }
 
+template <typename... Args>
+inline void log(fmt::format_string<Args...> fmtStr, Args&&... args)
+{
+    fmt::print(fmtStr, std::forward<Args>(args)...);
+}
+
+template <typename... Args>
+inline void log(fmt::text_style style, fmt::format_string<Args...> fmtStr, Args&&... args)
+{
+    fmt::print(style, fmtStr, std::forward<Args>(args)...);
+}
+
 inline void info(const std::string& msg, const auto&... args)
 {
     fmt::print(fg(fmt::color::blue) | fmt::emphasis::bold, "[INFO] ");

@@ -1,6 +1,5 @@
 #include "zuno/app.hpp"
 #include <fmt/color.h>
-#include <fmt/core.h>
 #include <algorithm>
 #include <asio.hpp>
 #include "zuno/http_server.hpp"
@@ -132,15 +131,15 @@ void App::listen(int port)
 {
     try
     {
-        fmt::print(fg(fmt::color::magenta) | fmt::emphasis::bold, "Zuno v{}\n", ZUNO_VERSION_STR);
+        log::log(fg(fmt::color::magenta) | fmt::emphasis::bold, "Zuno v{}\n", ZUNO_VERSION_STR);
 
         asio::io_context ctx;
         HttpServer server(ctx, port, *this);
         server.start();
 
-        fmt::print(fg(fmt::color::white) | fmt::emphasis::bold, "[ZUNO] ");
-        fmt::print("🚀 Listening on: ");
-        fmt::print(fg(fmt::color::cyan) | fmt::emphasis::bold, "http://localhost:{}\n", port);
+        log::log(fg(fmt::color::white) | fmt::emphasis::bold, "[ZUNO] ");
+        log::log("🚀 Listening on: ");
+        log::log(fg(fmt::color::cyan) | fmt::emphasis::bold, "http://localhost:{}\n", port);
 
         ctx.run();
     }

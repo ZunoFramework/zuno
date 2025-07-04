@@ -1,25 +1,14 @@
 #pragma once
 
+#include <fmt/color.h>
+#include <fmt/core.h>
 #include <chrono>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 #include <string>
 
 namespace zuno::log
 {
-
-namespace color
-{
-const std::string reset = "\033[0m";
-const std::string bold = "\033[1m";
-const std::string green = "\033[32m";
-const std::string yellow = "\033[33m";
-const std::string red = "\033[31m";
-const std::string cyan = "\033[36m";
-const std::string magenta = "\033[35m";
-const std::string gray = "\033[90m";
-} // namespace color
 
 inline std::string timestamp()
 {
@@ -35,45 +24,46 @@ inline std::string timestamp()
 
 inline void request(const std::string& method, const std::string& path, int status, long durationMs)
 {
-    std::string methodColor = color::cyan;
-    std::string statusColor;
+    fmt::color methodColor = fmt::color::cyan;
+    fmt::color statusColor;
 
     if (status < 300)
-        statusColor = color::green;
+        statusColor = fmt::color::light_green;
     else if (status < 500)
-        statusColor = color::yellow;
+        statusColor = fmt::color::yellow;
     else
-        statusColor = color::red;
+        statusColor = fmt::color::red;
 
-    std::cout << color::bold << "[ZUNO] " << methodColor << method << " " << color::reset << path
-              << " " << color::gray << "→ " << statusColor << status << color::reset << " "
-              << color::magenta << durationMs << "ms" << color::reset << "\n";
+    fmt::print(fg(fmt::color::white) | fmt::emphasis::bold, "[ZUNO] ");
+    fmt::print(fg(methodColor), "{}", method);
+    fmt::print(" {} ", path);
+    fmt::print(fg(fmt::color::gray), "→ ");
+    fmt::print(fg(statusColor), "{}", status);
+    fmt::print(fg(fmt::color::magenta), " {} ms\n", durationMs);
 }
 
-inline void log(const std::string& msg)
+inline void info(const std::string& msg, const auto&... args)
 {
-    std::cout << msg << "\n";
+    fmt::print(fg(fmt::color::blue) | fmt::emphasis::bold, "[INFO] ");
+    fmt::print("{}", timestamp());
+    std::string formattedText = fmt::vformat(msg, fmt::make_format_args(args...));
+    fmt::print(" {}\n", formattedText);
 }
 
-inline void info(const std::string& msg)
+inline void warn(const std::string& msg, const auto&... args)
 {
-    using namespace color;
-    std::cout << bold << cyan << "[INFO] " << gray << "[" << timestamp() << "] " << reset << msg
-              << "\n";
+    fmt::print(fg(fmt::color::yellow) | fmt::emphasis::bold, "[WARN] ");
+    std::string formattedText = fmt::vformat(msg, fmt::make_format_args(args...));
+    fmt::print(fg(fmt::color::gray), "{}", timestamp());
+    fmt::print(" {}\n", formattedText);
 }
 
-inline void warn(const std::string& msg)
+inline void error(const std::string& msg, const auto&... args)
 {
-    using namespace color;
-    std::cout << bold << yellow << "[WARN] " << gray << "[" << timestamp() << "] " << reset << msg
-              << "\n";
-}
-
-inline void error(const std::string& msg)
-{
-    using namespace color;
-    std::cerr << bold << red << "[ERROR] " << gray << "[" << timestamp() << "] " << reset << msg
-              << "\n";
+    fmt::print(fg(fmt::color::red) | fmt::emphasis::bold, "[ERROR] ");
+    std::string formattedText = fmt::vformat(msg, fmt::make_format_args(args...));
+    fmt::print(fg(fmt::color::gray), "{}", timestamp());
+    fmt::print(" {}\n", formattedText);
 }
 
 } // namespace zuno::log

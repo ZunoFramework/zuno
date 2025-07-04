@@ -4,8 +4,6 @@
 #include "zuno/request.hpp"
 #include "zuno/response.hpp"
 
-using namespace zuno::log::color;
-
 namespace zuno
 {
 
@@ -127,7 +125,7 @@ void HttpServer::handleConnection(asio::ip::tcp::socket socket)
         std::string reason(ex.what());
         if (reason.compare("end of file") > -1) return;
 
-        log::error(reason);
+        log::error("{}", reason);
     }
 }
 } // namespace zuno

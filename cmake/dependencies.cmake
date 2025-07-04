@@ -44,5 +44,15 @@ FetchContent_Declare(
   brotli
   GIT_REPOSITORY https://github.com/google/brotli.git
   GIT_TAG        v1.1.0
+  DOWNLOAD_EXTRACT_TIMESTAMP true
 )
 FetchContent_MakeAvailable(brotli)
+
+## FMT (log formatter)
+FetchContent_Declare(
+  fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG        8.1.1
+  DOWNLOAD_EXTRACT_TIMESTAMP true
+)
+FetchContent_MakeAvailable(fmt)

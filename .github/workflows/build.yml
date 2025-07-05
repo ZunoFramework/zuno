@@ -103,6 +103,9 @@ jobs:
         git fetch --tags
         git tag v${{ env.ZUNO_VERSION }}
         git push origin v${{ env.ZUNO_VERSION }}
+    
+    - name: Wait for GitHub to register tag
+      run: sleep 5
 
     - name: Generate changelog from commits
       id: changelog
@@ -121,6 +124,9 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         path: ./artifacts
+    
+    - name: List downloaded artifacts
+      run: ls -R ./artifacts
 
     - name: Create GitHub release
       uses: softprops/action-gh-release@v1
@@ -140,6 +146,12 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: v${{ env.ZUNO_VERSION }}
-        files: artifacts/**/*
+        files: |
+          artifacts/**/*.a
+          artifacts/**/*.lib
+          artifacts/**/*.dll
+          artifacts/**/*.dylib
+          artifacts/**/*.so
+          artifacts/**/*.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

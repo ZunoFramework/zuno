@@ -85,11 +85,19 @@ void App::options(const std::string& path, std::initializer_list<Middleware> mws
     addRoute("OPTIONS", path, mws, std::move(handler));
 }
 
-std::function<void(Request&, Response&)> App::resolveHandler(const std::string& method, const std::string& path,
+std::function<void(Request&, Response&)> App::resolveHandler(const std::string& method, const std::string& fullPath,
                                                              std::unordered_map<std::string, std::string>& outParams) const
 {
     auto it = routes.find(method);
     if (it == routes.end()) return nullptr;
+
+    // 🧹 Extraer solo el path sin query string
+    std::string path = fullPath;
+    std::size_t queryPos = path.find('?');
+    if (queryPos != std::string::npos)
+    {
+        path = path.substr(0, queryPos);
+    }
 
     for (const auto& route : it->second)
     {

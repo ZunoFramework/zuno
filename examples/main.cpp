@@ -14,7 +14,12 @@ int main()
 
     app.get("/rate-test", {zuno::rateLimit({10, 30000})}, [](const zuno::Request& req, zuno::Response& res) { res.send("Rate Limit Test"); });
 
-    app.get("/ping", [](const zuno::Request& req, zuno::Response& res) { res.send("Pong! 🚀"); });
+    app.get("/ping",
+            [](const zuno::Request& req, zuno::Response& res)
+            {
+                zuno::log::info("IsSecure? {}", req.is_secure());
+                res.send("Pong! 🚀");
+            });
 
     app.post("/echo",
              [](const zuno::Request& req, zuno::Response& res)

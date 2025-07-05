@@ -120,6 +120,15 @@ void HttpServer::handleConnection(StreamAdapterPtr stream)
         req.params = std::move(params);
         req.headers = std::move(headers);
 
+        if (auto tls = dynamic_cast<TlsStreamAdapter*>(stream.get()))
+        {
+            req.mark_secure(true);
+        }
+        else
+        {
+            req.mark_secure(false);
+        }
+
         zuno::Response res(stream);
 
         std::size_t index = 0;

@@ -144,6 +144,16 @@ class Request
         return path;
     }
 
+    bool is_secure() const
+    {
+        return secure_;
+    }
+
+    void mark_secure(bool value)
+    {
+        secure_ = value;
+    }
+
     std::unordered_map<std::string, std::string> headers;
     std::unordered_map<std::string, std::string> params;
 
@@ -157,6 +167,7 @@ class Request
     std::string method_;
     std::string url_;
     std::string ip_;
+    bool secure_ = false;
     StreamAdapterPtr stream_;
 };
 } // namespace zuno

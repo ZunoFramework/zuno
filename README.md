@@ -1,34 +1,70 @@
-**Zuno** is a lightweight and modular framework written in C++ for building modern, fast, and cross-platform web servers. Designed with simplicity, efficiency, and freedom in mind, Zuno aims to offer an elegant experience for developers who need high performance without sacrificing code clarity.
+# ⚡ Zuno Framework
 
-## 🚀 Main Features (in development)
+Zuno Framework is a powerful and modern web framework written in C++, designed to deliver exceptional performance without sacrificing simplicity. Inspired by the philosophy of Express.js and powered by standalone Asio, Zuno enables developers to build secure, modular, and scalable web applications with a clean and expressive API.
 
-- ⚡ Modular architecture based on components
-- 🌐 Cross-platform support (Linux, macOS, Windows)
-- 🧩 Easy integration with external libraries
-- 📦 Ready for microservices and embedded applications
-- 🔒 Focus on security, efficiency, and compatibility with modern C++
+## 🚀 Key Features
 
-## 🛠 Project Structure
-<pre><code> 
-zuno/ 
-├── include/ # Public interfaces 
-├── src/ # Core implementation 
-├── examples/ # Framework use cases 
-├── tests/ # Automated tests 
-├── docs/ # Future documentation
-</code></pre>
+- 🔧 **Fully modular**: Structure your application as a set of independent, reusable modules.  
+- 🔒 **TLS support via `useTLS`**: Production-ready HTTPS with a simple and direct function call.  
+- ⚙️ **Built on standalone Asio**: Harness the power of asynchronous I/O with zero external dependencies.  
+- 🧩 **Intuitive routing**: Define routes with clarity and full control.  
+- 🛡️ **Global and per-route middleware**: Chain custom logic for authentication, logging, validation, and more.  
+- 📦 **Lightweight and dependency-free**: Ideal for embedded systems or high-performance environments.  
 
-## 📦 Quick Build
-```bash
-mkdir build && cd build
-cmake ..
-make
+## 🛠️ Quick Example
+
+```cpp
+#include <zuno/zuno.hpp>
+#include <zuno/logger.hpp>
+
+int main() {
+    zuno::App app;
+
+    app.use([](const zuno::Request& req, zuno::Response& res, zuno::Next next) {
+        zuno::log::info("Global middleware");
+        next();
+    });
+
+    app.get("/hello", [](const zuno::Request& req, zuno::Response& res) {
+        res.send("Hello from HTTPS Zuno!");
+    });
+
+    app.useTLS({"server.crt", "server.key"});
+
+    app.listen(443);
+}
 ```
 
-## 📚 License
+## 📚 Documentation
 
-This project is licensed under the GNU Affero General Public License v3.0. Any modification or public use of the software must comply with its terms.
+Full documentation is coming soon. In the meantime, here are some key components:
 
-## 🤝 Contributions
+- `zuno::App` – Core of the framework  
+- `zuno::Request` and `zuno::Response` – Request and response handling  
+- `zuno::Next` – Middleware flow control  
+- `useTLS(app, config)` – Enable HTTPS with certificate configuration  
 
-We are still in an early stage. All suggestions, ideas, or reports are welcome. You can open an issue or propose changes via pull requests.
+## 🧪 Project Status
+
+Zuno Framework is under active development. The following features are available or in progress:
+
+| Feature                | Status           |
+|------------------------|------------------|
+| Basic routing          | ✅ Ready          |
+| TLS via `useTLS`       | ✅ Ready          |
+| Global middleware      | ✅ Ready          |
+| Per-route middleware   | ✅ Ready          |
+| HTML templating        | 🔜 Planned        |
+| WebSockets             | 🔜 Planned        |
+
+## 🤝 Contributing
+
+Contributions are welcome! If you'd like to get involved, check out the [issues](https://github.com/ZunoFramework/zuno/issues) or open a pull request.
+
+## 📄 License
+
+Zuno Framework is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+
+---
+
+Crafted with passion by **Seobryn** ⚙️

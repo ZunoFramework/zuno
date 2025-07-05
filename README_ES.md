@@ -1,45 +1,73 @@
-# Zuno
+# ⚡ Zuno Framework
 
-![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)
-![Build](https://img.shields.io/badge/build-passing-brightgreen)
-![Platform](https://img.shields.io/badge/platform-linux%20%7C%20macOS%20%7C%20windows-lightgrey)
-![C++](https://img.shields.io/badge/C%2B%2B-20-blue)
-![Build Status](https://github.com/ZunoFramework/zuno/actions/workflows/build.yml/badge.svg)
+Zuno Framework es un potente y moderno framework web escrito en C++, diseñado para ofrecer un rendimiento excepcional sin sacrificar la simplicidad. Inspirado en la filosofía de Express.js y potenciado por Asio standalone, Zuno permite a los desarrolladores construir aplicaciones web seguras, modulares y escalables con una API clara y elegante.
 
+## 🚀 Características principales
 
-**Zuno** es un framework ligero y modular escrito en C++ para la creación de servidores web modernos, rápidos y multiplataforma. Diseñado pensando en la simplicidad, eficiencia y libertad, Zuno busca ofrecer una experiencia elegante para desarrolladores que requieren alto rendimiento sin sacrificar claridad en el código.
+- 🔧 **Modularidad total**: Diseña tu aplicación como un conjunto de módulos independientes y reutilizables.  
+- 🔒 **Soporte TLS con `useTLS`**: Seguridad lista para producción con una función clara y directa.  
+- ⚙️ **Basado en Asio standalone**: Aprovecha la eficiencia de I/O asincrónico sin dependencias externas.  
+- 🧩 **Routing intuitivo**: Define rutas con expresividad y control total.  
+- 🛡️ **Middlewares globales y por ruta**: Encadena lógica personalizada para autenticación, logging, validación y más.  
+- 📦 **Ligero y sin dependencias pesadas**: Ideal para sistemas embebidos o entornos de alto rendimiento.  
 
-## 🚀 Características principales (en desarrollo)
+## 🛠️ Ejemplo rápido
 
-- ⚡ Arquitectura modular basada en componentes
-- 🌐 Soporte multiplataforma (Linux, macOS, Windows)
-- 🧩 Integración sencilla con bibliotecas externas
-- 📦 Preparado para microservicios y aplicaciones embebidas
-- 🔒 Enfoque en seguridad, eficiencia y compatibilidad con C++ moderno
+```cpp
+#include <zuno/zuno.hpp>
+#include <zuno/logger.hpp>
 
-## 🛠 Estructura del proyecto
+int main() {
+    zuno::App app;
 
-<pre>
-<code>
-zuno/
-├── include/        # Interfaces públicas
-├── src/            # Implementación del núcleo
-├── examples/       # Casos de uso del framework
-├── tests/          # Pruebas automatizadas
-├── docs/           # Documentación futura
-</code>
-</pre>
+    app.use([](const zuno::Request& req, zuno::Response& res, zuno::Next next) {
+        zuno::log::info("Middleware global");
+        next();
+    });
 
-## 📦 Compilación rápida
+    app.get("/hello", [](const zuno::Request& req, zuno::Response& res) {
+        res.send("¡Hola desde Zuno!");
+    });
 
-```bash
-mkdir build && cd build
-cmake ..
-make
+    zuno::useTLS(app, {
+        .certFile = "cert.pem",
+        .keyFile = "key.pem"
+    });
+
+    app.listen(3456);
+}
 ```
 
-## 📚 Licencia
-Este proyecto está licenciado bajo la GNU Affero General Public License v3.0. Cualquier modificación o uso público del software debe cumplir con sus términos.
+## 📚 Documentación
+
+La documentación completa estará disponible pronto. Mientras tanto, puedes explorar los siguientes componentes clave:
+
+- `zuno::App` – Núcleo del framework  
+- `zuno::Request` y `zuno::Response` – Manejo de solicitudes y respuestas  
+- `zuno::Next` – Control de flujo entre middlewares  
+- `useTLS(app, config)` – Activación de HTTPS con certificados  
+
+## 🧪 Estado del proyecto
+
+Zuno Framework está en desarrollo activo. Las siguientes funcionalidades están disponibles o en progreso:
+
+| Funcionalidad         | Estado           |
+|-----------------------|------------------|
+| Routing básico        | ✅ Listo          |
+| TLS con `useTLS`      | ✅ Listo          |
+| Middleware global     | ✅ Listo          |
+| Middleware por ruta   | ✅ Listo          |
+| Plantillas HTML       | 🔜 Planeado       |
+| WebSockets            | 🔜 Planeado       |
 
 ## 🤝 Contribuciones
-Aún estamos en fase inicial. Toda sugerencia, idea o reporte será bien recibido. Puedes abrir una issue o proponer cambios mediante pull requests.
+
+¡Las contribuciones son bienvenidas! Si deseas colaborar, revisa los [issues](https://github.com/ZunoFramework/zuno/issues) o abre un pull request.
+
+## 📄 Licencia
+
+Zuno Framework está licenciado bajo la [GNU Affero General Public License v3.0](LICENSE).
+
+---
+
+Desarrollado con pasión por **Seobryn** ⚙️

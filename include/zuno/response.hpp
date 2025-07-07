@@ -67,6 +67,12 @@ class Response
         send(body);
     }
 
+    void xml(const nlohmann::json& data)
+    {
+        setHeader("Content-Type", "application/xml");
+        send(json_to_xml(data));
+    }
+
     int statusCode() const
     {
         return statusCode_;

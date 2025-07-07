@@ -22,7 +22,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DZUNO_BUILD_TOOLS=1
         make
       shell: bash
 

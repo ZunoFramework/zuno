@@ -36,8 +36,10 @@ if(ZUNO_BUILD_EXAMPLES)
 endif()
 
 # --- Build Tools------------------------------------------
-add_executable(print_version tools/print_version.cpp)
-target_include_directories(print_version PRIVATE ${CMAKE_SOURCE_DIR}/include)
+if(ZUNO_BUILD_TOOLS)
+  add_executable(print_version tools/print_version.cpp)
+  target_include_directories(print_version PRIVATE ${CMAKE_SOURCE_DIR}/include)
+endif()
 
 # ---📦 Install Targets---------------------------------
 install(TARGETS zuno

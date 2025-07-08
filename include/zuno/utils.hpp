@@ -1,5 +1,7 @@
 #pragma once
+#include <fstream>
 #include <nlohmann/json.hpp>
+#include <sstream>
 #include <string>
 
 namespace zuno
@@ -72,6 +74,24 @@ inline std::string json_to_xml(const json& j, const std::string& root = "respons
     };
 
     to_xml(j, root);
+    return oss.str();
+}
+
+inline std::string readFile(const std::string& file_path)
+{
+    std::ifstream file(file_path);
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open file: " + file_path);
+    }
+
+    std::ostringstream oss;
+    oss << file.rdbuf();
+    if (!file)
+    {
+        throw std::runtime_error("Failed to read file: " + file_path);
+    }
+
     return oss.str();
 }
 } // namespace zuno

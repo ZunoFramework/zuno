@@ -73,6 +73,12 @@ class Response
         send(json_to_xml(data));
     }
 
+    void html(const std::string& file_path)
+    {
+        setHeader("Content-Type", "text/html");
+        send(readFile(file_path));
+    }
+
     int statusCode() const
     {
         return statusCode_;

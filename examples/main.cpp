@@ -9,8 +9,10 @@ int main()
     zuno::App app;
 
     app.use(zuno::cors());
-    app.use(zuno::staticFiles({"public", "/", true, 36}));
+    // app.use(zuno::staticFiles({"public", "/", true, 36}));
     app.use(zuno::compression());
+
+    app.get("/html", [](auto& req, auto& res) { res.html("./public/index.html"); });
 
     app.get("/rate-test", {zuno::rateLimit({10, 30000})}, [](const zuno::Request& req, zuno::Response& res) { res.send("Rate Limit Test"); });
 

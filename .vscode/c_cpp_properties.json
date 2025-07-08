@@ -4,7 +4,8 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/src"
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/build/_deps/nlohmann_json-src/include"
             ],
             "macFrameworkPath": [
                 "/System/Library/Frameworks",

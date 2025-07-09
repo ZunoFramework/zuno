@@ -23,7 +23,7 @@ int main()
                 res.send("Pong! 🚀");
             });
 
-    app.get("/hello-xml", [](auto& req, auto& res) { res.xml({{"Hello", "WOrld"}}); });
+    app.get("/hello-xml", [](auto& req, auto& res) { res.xml({{"Hello", "World"}}); });
 
     app.post("/echo",
              [](const zuno::Request& req, zuno::Response& res)

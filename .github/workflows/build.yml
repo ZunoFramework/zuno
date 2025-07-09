@@ -139,8 +139,10 @@ jobs:
 
           ## Changes
           ${{ env.CHANGELOG }}
+        generate_release_notes: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
     - name: Upload compiled libraries
       uses: softprops/action-gh-release@v1

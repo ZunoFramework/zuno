@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
-project(zuno VERSION 0.1.1 LANGUAGES CXX)
+project(zuno VERSION 0.1.2 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
+
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_C_FLAGS_RELEASE "-O3")
 
 include(cmake/version.cmake)
 include(cmake/options.cmake)

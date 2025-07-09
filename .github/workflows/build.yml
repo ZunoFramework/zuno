@@ -98,14 +98,10 @@ jobs:
         git config user.name "github-actions"
         git config user.email "github-actions@github.com"
 
-    - name: Create Git tag
+    - name: Fetch full Git history and tags
       run: |
+        git fetch --prune --unshallow || true
         git fetch --tags
-        git tag v${{ env.ZUNO_VERSION }}
-        git push origin v${{ env.ZUNO_VERSION }}
-    
-    - name: Wait for GitHub to register tag
-      run: sleep 5
 
     - name: Generate changelog from commits
       id: changelog
@@ -124,36 +120,32 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         path: ./artifacts
-    
-    - name: List downloaded artifacts
-      run: ls -R ./artifacts
 
-    - name: Create GitHub release
+    - name: Rename assets to avoid conflicts
+      run: |
+        for dir in artifacts/*; do
+          os=$(basename "$dir" | tr '[:upper:]' '[:lower:]')
+          mkdir -p renamed
+          for file in "$dir"/*; do
+            base=$(basename "$file")
+            cp "$file" "renamed/${os}-${base}"
+          done
+        done
+
+    - name: List renamed assets
+      run: ls -lh renamed
+
+    - name: Create GitHub release and upload assets
       uses: softprops/action-gh-release@v1
       with:
         tag_name: v${{ env.ZUNO_VERSION }}
         name: Zuno Release v${{ env.ZUNO_VERSION }}
         body: |
-          🚀 New release of the Zuno library.
-          - Version: v${{ env.ZUNO_VERSION }}
+          🚀 New release of the Zuno library
+          Version: **v${{ env.ZUNO_VERSION }}**
 
           ## Changes
           ${{ env.CHANGELOG }}
-        generate_release_notes: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-    - name: Upload compiled libraries
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: v${{ env.ZUNO_VERSION }}
-        files: |
-          artifacts/**/*.a
-          artifacts/**/*.lib
-          artifacts/**/*.dll
-          artifacts/**/*.dylib
-          artifacts/**/*.so
-          artifacts/**/*.zip
+        files: renamed/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

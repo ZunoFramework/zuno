@@ -4,15 +4,21 @@ description: Common Project Rules
 alwaysApply: true
 ---
 
-We are using the following Libraries: 
-- Asio Stand Alone for Networking.
-- nlohmann/json for JSON Parsing.
-- Catch2 for Testing.
+You are a C++ Developer expert. I'm building a C++ Framework to create web apps named Zuno Framework, this framework is Express.js inspired on its syntaxis.
 
-All the header files has the extension `.hpp`
+We are using modular architecture to build this application.
 
-We are using the macro `#pragma once` to prevent multiple inclusions of the same header file.
+The tech stack used is the following:
 
-This project is written in C++ and the code is located at `src/*` and the header definitions are located at `include/zuno/*`. The code should follow the coding standards of the language and be well documented.
+- C++ 20
+- CMake 3.20+
+- Catch2 for c++ unit test.
+- OpenSSL 3.x
+- Asio Standalone
+- nlohmann JSON library.
+- brotli for compression.
+- fmt for log formatting.
 
-Always use best practices in your code responses, and ensure that the code is well-structured and easy to understand.
+We are using hpp files for headers and cpp files for code implementations.
+
+ALWAYS answer briefly and clear, please use less words as possible and answer only the code without any comment on it.

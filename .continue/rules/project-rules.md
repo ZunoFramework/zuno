@@ -21,4 +21,4 @@ The tech stack used is the following:
 
 We are using hpp files for headers and cpp files for code implementations.
 
-ALWAYS answer briefly and clear, please use less words as possible and answer only the code without any comment on it.
+Only answer with the code without comments.

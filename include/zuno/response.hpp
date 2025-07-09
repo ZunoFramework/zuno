@@ -111,6 +111,13 @@ class Response
         return *this;
     }
 
+    Response& setCookie(const std::string& key, const std::string value)
+    {
+        cookies_[key] = value;
+        updateHeaders();
+        return *this;
+    }
+
     void write(const std::string& chunk)
     {
         ostream_ << chunk;
@@ -126,8 +133,9 @@ class Response
     asio::streambuf buffer_;
     std::ostream ostream_;
     std::string body_;
-    std::unordered_map<std::string, std::string> headers_ = {{"X-Powered-By", std::string("Zuno/") + ZUNO_VERSION_STR},
+    std::unordered_map<std::string, std::string> headers_ = {{"X-Powered-By", std::string("Zuno v.") + ZUNO_VERSION_STR},
                                                              {"Content-Type", "text/plain;charset=utf-8"}};
+    std::unordered_map<std::string, std::string> cookies_ = {};
 
     SendWrapper sendWrapper_ = nullptr;
     bool headersSent_ = false;
@@ -144,6 +152,21 @@ class Response
         auto end = asio::buffers_end(buffer_.data());
         stream_->write(&(*begin), std::distance(begin, end));
         buffer_.consume(buffer_.size());
+    }
+
+    void updateHeaders()
+    {
+        std::stringstream ss;
+        for (const auto& pair : cookies_)
+        {
+            ss << pair.first << "=" << pair.second << "; ";
+        }
+        if (!ss.str().empty())
+        {
+            ss.seekp(-2);
+        }
+
+        headers_["Set-Cookie"] = ss.str();
     }
 };
 

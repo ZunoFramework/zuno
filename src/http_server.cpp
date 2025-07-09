@@ -119,14 +119,16 @@ void HttpServer::handleConnection(StreamAdapterPtr stream)
         req.setBody(std::move(body));
         req.params = std::move(params);
         req.headers = std::move(headers);
+        auto cookieStr = req.headers.find("Cookie")->second;
+        req.configureCookies(cookieStr);
 
         if (auto tls = dynamic_cast<TlsStreamAdapter*>(stream.get()))
         {
-            req.mark_secure(true);
+            req.markSecure(true);
         }
         else
         {
-            req.mark_secure(false);
+            req.markSecure(false);
         }
 
         zuno::Response res(stream);

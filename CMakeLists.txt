@@ -3,7 +3,7 @@ project(zuno VERSION 0.1.2 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 
 include(cmake/version.cmake)

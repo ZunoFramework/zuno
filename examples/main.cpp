@@ -19,7 +19,8 @@ int main()
     app.get("/ping",
             [](const zuno::Request& req, zuno::Response& res)
             {
-                zuno::log::info("IsSecure? {}", req.is_secure());
+                zuno::log::info("IsSecure? {}", req.isSecure());
+                res.setCookie("Test", "Oh My Cookie");
                 res.send("Pong! 🚀");
             });
 

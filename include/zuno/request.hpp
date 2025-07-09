@@ -1,10 +1,10 @@
-// request.hpp
 #pragma once
 
 #include <nlohmann/json.hpp>
 #include <string>
 #include <unordered_map>
 #include "stream_adapter.hpp"
+#include "zuno/logger.hpp"
 
 namespace zuno
 {
@@ -144,23 +144,38 @@ class Request
         return path;
     }
 
-    bool is_secure() const
+    bool isSecure() const
     {
         return secure_;
     }
 
-    void mark_secure(bool value)
+    void markSecure(bool value)
     {
         secure_ = value;
     }
 
-    std::unordered_map<std::string, std::string> headers;
-    std::unordered_map<std::string, std::string> params;
+    std::string getCookie(std::string cookieName) const
+    {
+        auto value = cookies.find(cookieName);
+
+        if (value != cookies.end())
+        {
+            return value->second;
+        }
+
+        return "";
+    }
 
     StreamAdapterPtr stream() const
     {
         return stream_;
     }
+
+    std::unordered_map<std::string, std::string> headers;
+    std::unordered_map<std::string, std::string> params;
+    std::unordered_map<std::string, std::string> cookies;
+
+    friend class HttpServer;
 
    private:
     std::string body_;
@@ -169,5 +184,28 @@ class Request
     std::string ip_;
     bool secure_ = false;
     StreamAdapterPtr stream_;
+
+    void configureCookies(std::string cookieStr)
+    {
+        std::istringstream stream(cookieStr);
+        std::string pair;
+
+        while (std::getline(stream, pair, ';'))
+        {
+            auto eq_pos = pair.find('=');
+            if (eq_pos != std::string::npos)
+            {
+                std::string key = pair.substr(0, eq_pos);
+                std::string value = pair.substr(eq_pos + 1);
+
+                key.erase(0, key.find_first_not_of(" \t"));
+                key.erase(key.find_last_not_of(" \t") + 1);
+                value.erase(0, value.find_first_not_of(" \t"));
+                value.erase(value.find_last_not_of(" \t") + 1);
+
+                cookies[key] = value;
+            }
+        }
+    }
 };
 } // namespace zuno

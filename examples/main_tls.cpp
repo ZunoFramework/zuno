@@ -19,7 +19,7 @@ int main()
     app.get("/ping",
             [](auto& req, auto& res)
             {
-                zuno::log::info("IsSecure? {}", req.is_secure());
+                zuno::log::info("IsSecure? {}", req.isSecure());
                 res.send("Pong! 🚀");
             });
 

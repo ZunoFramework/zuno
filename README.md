@@ -1,4 +1,4 @@
-# ⚡ Zuno Framework
+# 🦜 Zuno Framework
 
 Zuno Framework is a powerful and modern web framework written in C++, designed to deliver exceptional performance without sacrificing simplicity. Inspired by the philosophy of Express.js and powered by standalone Asio, Zuno enables developers to build secure, modular, and scalable web applications with a clean and expressive API.
 
